@@ -2,6 +2,7 @@
   "itemGroup.pantheon": "Example Mod Tab",
   "block.pantheon.example_block": "Example Block",
   "item.pantheon.example_item": "Example Item",
+  "block.pantheon.temple": "Temple",
 
   "pantheon.configuration.title": "Pantheon Configs",
   "pantheon.configuration.section.pantheon.common.toml": "Pantheon Configs",

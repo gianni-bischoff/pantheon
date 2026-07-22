@@ -1,37 +1,21 @@
 package gg.wildblood.command
 
 import com.mojang.brigadier.CommandDispatcher
-import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
 import gg.wildblood.attachment.ModAttachments
 import gg.wildblood.block.ModBlocks
-import gg.wildblood.config.Config
 import gg.wildblood.faction.PantheonSavedData
-import gg.wildblood.faction.SeasonState
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 object ModCommands {
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
         val root = Commands.literal("pantheon").requires { it.hasPermission(2) }
-
-        root.then(Commands.literal("season")
-            .then(Commands.literal("start")
-                .executes { startSeason(it, Config.DEFAULT_SEASON_DURATION_DAYS.get()) }
-                .then(Commands.argument("durationDays", IntegerArgumentType.integer(0, 365))
-                    .executes { startSeason(it, IntegerArgumentType.getInteger(it, "durationDays")) }))
-            .then(Commands.literal("end")
-                .executes { endSeason(it) })
-            .then(Commands.literal("info")
-                .executes { seasonInfo(it) }))
 
         root.then(Commands.literal("faction")
             .then(Commands.literal("create")
@@ -50,47 +34,6 @@ object ModCommands {
                 .executes { factionList(it) }))
 
         dispatcher.register(root)
-    }
-
-    private fun startSeason(ctx: CommandContext<CommandSourceStack>, durationDays: Int): Int {
-        val source = ctx.source
-        val data = PantheonSavedData.get(source.server)
-        val existing = data.season
-        if (existing != null && existing.phase != SeasonState.SeasonPhase.ENDED) {
-            source.sendFailure(Component.translatable("pantheon.command.season.start.already_running", existing.id.toString()))
-            return 0
-        }
-        val s = data.startSeason(durationDays)
-        val endsStr = if (s.endsAt == 0L) "open-ended" else Instant.ofEpochMilli(s.endsAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        source.sendSuccess({ Component.translatable("pantheon.command.season.start.success", s.id.toString(), endsStr) }, true)
-        return 1
-    }
-
-    private fun endSeason(ctx: CommandContext<CommandSourceStack>): Int {
-        val source = ctx.source
-        val data = PantheonSavedData.get(source.server)
-        val s = data.season
-        if (s == null) {
-            source.sendFailure(Component.translatable("pantheon.command.season.info.none"))
-            return 0
-        }
-        data.endSeason()
-        source.sendSuccess({ Component.translatable("pantheon.command.season.end.success", s.id.toString()) }, true)
-        return 1
-    }
-
-    private fun seasonInfo(ctx: CommandContext<CommandSourceStack>): Int {
-        val source = ctx.source
-        val data = PantheonSavedData.get(source.server)
-        val s = data.season
-        if (s == null) {
-            source.sendSuccess({ Component.translatable("pantheon.command.season.info.none") }, false)
-            return 0
-        }
-        val startStr = Instant.ofEpochMilli(s.startedAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        val endsStr = if (s.endsAt == 0L) "open-ended" else Instant.ofEpochMilli(s.endsAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        source.sendSuccess({ Component.translatable("pantheon.command.season.info.current", s.id.toString(), s.phase.name, startStr, endsStr) }, false)
-        return 1
     }
 
     private fun createFaction(ctx: CommandContext<CommandSourceStack>): Int {

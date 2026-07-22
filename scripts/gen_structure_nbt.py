@@ -129,15 +129,14 @@ def main():
     # But the spec uses @GameTestHolder(MODID) which prepends simple class name unless @PrefixGameTestTemplate(false)
     # We'll use @PrefixGameTestTemplate(false) so template name = method name lowercase
     templates = [
-        "pantheon_season_start",
-        "pantheon_season_end",
-        "pantheon_season_info",
         "pantheon_faction_create",
         "pantheon_faction_assign",
         "pantheon_faction_info",
         "pantheon_faction_list",
         "pantheon_temple_mirror",
         "pantheon_persistence",
+        "pantheon_faction_color",
+        "pantheon_faction_id_inference",
     ]
 
     for name in templates:

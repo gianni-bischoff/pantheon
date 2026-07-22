@@ -6,8 +6,9 @@ import net.minecraft.resources.ResourceLocation
 
 data class Faction(
     val id: ResourceLocation,
-    val displayName: String,
-    val anchor: BlockPos,
+    var displayName: String,
+    var anchor: BlockPos,
+    var color: Int = 0,
     var godId: ResourceLocation? = null,
     val members: MutableSet<UUID> = mutableSetOf(),
     var mayor: UUID? = null,

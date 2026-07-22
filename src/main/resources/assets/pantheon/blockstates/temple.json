@@ -1,5 +1,20 @@
 {
   "variants": {
-    "": { "model": "pantheon:block/temple" }
+    "color=white": { "model": "pantheon:block/temple" },
+    "color=orange": { "model": "pantheon:block/temple" },
+    "color=magenta": { "model": "pantheon:block/temple" },
+    "color=light_blue": { "model": "pantheon:block/temple" },
+    "color=yellow": { "model": "pantheon:block/temple" },
+    "color=lime": { "model": "pantheon:block/temple" },
+    "color=pink": { "model": "pantheon:block/temple" },
+    "color=gray": { "model": "pantheon:block/temple" },
+    "color=light_gray": { "model": "pantheon:block/temple" },
+    "color=cyan": { "model": "pantheon:block/temple" },
+    "color=purple": { "model": "pantheon:block/temple" },
+    "color=blue": { "model": "pantheon:block/temple" },
+    "color=brown": { "model": "pantheon:block/temple" },
+    "color=green": { "model": "pantheon:block/temple" },
+    "color=red": { "model": "pantheon:block/temple" },
+    "color=black": { "model": "pantheon:block/temple" }
   }
 }

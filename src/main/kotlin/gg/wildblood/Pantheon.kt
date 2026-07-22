@@ -10,7 +10,8 @@ import gg.wildblood.data.ModDataGenerator
 import gg.wildblood.entity.ModEntities
 import gg.wildblood.item.ModCreativeTabs
 import gg.wildblood.item.ModItems
-import gg.wildblood.season.SeasonManager
+import gg.wildblood.login.FactionLoginHandler
+import com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.world.level.block.Blocks
 import net.neoforged.bus.api.SubscribeEvent
@@ -63,22 +64,19 @@ object Pantheon {
         REGISTRIES.forEach { it.register(MOD_BUS) }
 
         NeoForge.EVENT_BUS.register(this)
-        NeoForge.EVENT_BUS.register(SeasonManager)
+        NeoForge.EVENT_BUS.register(FactionLoginHandler)
         NeoForge.EVENT_BUS.addListener(::onRegisterCommands)
 
         LOADING_CONTEXT.activeContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC)
     }
 
     private fun commonSetup(event: FMLCommonSetupEvent) {
-        LOGGER.info("HELLO FROM COMMON SETUP")
-
-        if (Config.LOG_DIRT_BLOCK.get()) {
-            LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT))
+        com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType.register(FactionLoginHandler.FACTION_SELECT_UI_ID) { p ->
+            object : com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType.PlayerUIHolder {
+                override fun createUI(player: net.minecraft.world.entity.player.Player): com.lowdragmc.lowdraglib2.gui.ui.ModularUI =
+                    gg.wildblood.client.gui.FactionSelectUI.create(player as net.minecraft.server.level.ServerPlayer)
+            }
         }
-
-        LOGGER.info("{}{}", Config.MAGIC_NUMBER_INTRODUCTION.get(), Config.MAGIC_NUMBER.get())
-
-        Config.ITEM_STRINGS.get().forEach { item -> LOGGER.info("ITEM >> {}", item) }
     }
 
     private fun onRegister(event: RegisterEvent) {

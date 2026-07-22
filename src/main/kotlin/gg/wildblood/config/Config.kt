@@ -41,10 +41,5 @@ object Config {
         .translation("pantheon.configuration.islandAnchorB")
         .define("islandAnchorB", "1000 100 0")
 
-    val DEFAULT_SEASON_DURATION_DAYS: ModConfigSpec.IntValue = BUILDER
-        .comment("Default season duration in days (0 = open-ended). Used by /pantheon season start with no arg.")
-        .translation("pantheon.configuration.defaultSeasonDurationDays")
-        .defineInRange("defaultSeasonDurationDays", 60, 0, 365)
-
     val SPEC: ModConfigSpec = BUILDER.build()
 }

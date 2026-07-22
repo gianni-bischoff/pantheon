@@ -9,6 +9,7 @@ import gg.wildblood.data.ModDataGenerator
 import gg.wildblood.entity.ModEntities
 import gg.wildblood.item.ModCreativeTabs
 import gg.wildblood.item.ModItems
+import gg.wildblood.season.SeasonManager
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.world.level.block.Blocks
 import net.neoforged.bus.api.SubscribeEvent
@@ -60,6 +61,7 @@ object Pantheon {
         REGISTRIES.forEach { it.register(MOD_BUS) }
 
         NeoForge.EVENT_BUS.register(this)
+        NeoForge.EVENT_BUS.register(SeasonManager)
 
         LOADING_CONTEXT.activeContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC)
     }

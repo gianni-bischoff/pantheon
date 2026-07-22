@@ -1,6 +1,7 @@
 package gg.wildblood
 
 import com.mojang.logging.LogUtils
+import gg.wildblood.attachment.ModAttachments
 import gg.wildblood.block.ModBlocks
 import gg.wildblood.blockentity.ModBlockEntities
 import gg.wildblood.config.Config
@@ -47,6 +48,7 @@ object Pantheon {
         ModCreativeTabs.REGISTRY,
         ModEntities.REGISTRY,
         ModBlockEntities.REGISTRY,
+        ModAttachments.REGISTRY,
     )
 
     init {

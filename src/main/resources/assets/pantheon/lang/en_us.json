@@ -1,0 +1,13 @@
+{
+  "itemGroup.pantheon": "Example Mod Tab",
+  "block.pantheon.example_block": "Example Block",
+  "item.pantheon.example_item": "Example Item",
+
+  "pantheon.configuration.title": "Pantheon Configs",
+  "pantheon.configuration.section.pantheon.common.toml": "Pantheon Configs",
+  "pantheon.configuration.section.pantheon.common.toml.title": "Pantheon Configs",
+  "pantheon.configuration.items": "Item List",
+  "pantheon.configuration.logDirtBlock": "Log Dirt Block",
+  "pantheon.configuration.magicNumberIntroduction": "Magic Number Text",
+  "pantheon.configuration.magicNumber": "Magic Number"
+}

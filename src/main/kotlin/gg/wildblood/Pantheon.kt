@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils
 import gg.wildblood.attachment.ModAttachments
 import gg.wildblood.block.ModBlocks
 import gg.wildblood.blockentity.ModBlockEntities
+import gg.wildblood.command.ModCommands
 import gg.wildblood.config.Config
 import gg.wildblood.data.ModDataGenerator
 import gg.wildblood.entity.ModEntities
@@ -19,6 +20,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.data.event.GatherDataEvent
 import net.neoforged.neoforge.event.server.ServerStartingEvent
+import net.neoforged.neoforge.event.RegisterCommandsEvent
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
 import net.neoforged.neoforge.registries.DeferredRegister
 import net.neoforged.neoforge.registries.RegisterEvent
@@ -62,6 +64,7 @@ object Pantheon {
 
         NeoForge.EVENT_BUS.register(this)
         NeoForge.EVENT_BUS.register(SeasonManager)
+        NeoForge.EVENT_BUS.addListener(::onRegisterCommands)
 
         LOADING_CONTEXT.activeContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC)
     }
@@ -90,5 +93,9 @@ object Pantheon {
     @SubscribeEvent
     fun onServerStarting(event: ServerStartingEvent) {
         LOGGER.info("HELLO from server starting")
+    }
+
+    private fun onRegisterCommands(event: RegisterCommandsEvent) {
+        ModCommands.register(event.dispatcher)
     }
 }

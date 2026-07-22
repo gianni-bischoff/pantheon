@@ -23,5 +23,19 @@
   "pantheon.configuration.islandAnchorB": "Island B Anchor (Temple block position)",
   "pantheon.configuration.islandAnchorB.tooltip": "BlockPos of faction B's island anchor (Temple block). Format: 'x y z'",
   "pantheon.configuration.defaultSeasonDurationDays": "Default Season Duration (days, 0=open)",
-  "pantheon.configuration.defaultSeasonDurationDays.tooltip": "Default season duration in days (0 = open-ended). Used by /pantheon season start with no arg."
+  "pantheon.configuration.defaultSeasonDurationDays.tooltip": "Default season duration in days (0 = open-ended). Used by /pantheon season start with no arg.",
+
+  "pantheon.command.season.start.success": "Season started (id: %s, ends: %s)",
+  "pantheon.command.season.start.already_running": "Season already running (id: %s)",
+  "pantheon.command.season.end.success": "Season ended (id: %s)",
+  "pantheon.command.season.info.none": "No active season",
+  "pantheon.command.season.info.current": "Season %s — phase: %s, started: %s, ends: %s",
+  "pantheon.command.faction.create.success": "Faction %s created at %s",
+  "pantheon.command.faction.create.no_temple": "No Temple block at %s",
+  "pantheon.command.faction.create.exists": "Faction %s already exists",
+  "pantheon.command.faction.assign.success": "%s assigned to %s",
+  "pantheon.command.faction.info.none": "No such faction: %s",
+  "pantheon.command.faction.info.detail": "Faction %s — god: %s, mayor: %s, members: %d, skillpoints: %d",
+  "pantheon.command.faction.list.header": "Factions (%d):",
+  "pantheon.command.faction.list.entry": "- %s (%s): %d members, god: %s"
 }

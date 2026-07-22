@@ -9,5 +9,11 @@
   "pantheon.configuration.items": "Item List",
   "pantheon.configuration.logDirtBlock": "Log Dirt Block",
   "pantheon.configuration.magicNumberIntroduction": "Magic Number Text",
-  "pantheon.configuration.magicNumber": "Magic Number"
+  "pantheon.configuration.magicNumber": "Magic Number",
+
+  "pantheon.configuration.logDirtBlock.tooltip": "Whether to log the dirt block on common setup",
+  "pantheon.configuration.magicNumberIntroduction.tooltip": "What you want the introduction message to be for the magic number",
+  "pantheon.configuration.items.tooltip": "A list of items to log on common setup",
+  "pantheon.configuration.magicNumber.tooltip": "A magic number",
+  "pantheon.configuration.items.button": "Edit Item List"
 }

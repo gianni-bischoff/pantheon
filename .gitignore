@@ -1,8 +1,11 @@
 ### Gradle ###
-.gradle
+.gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/**/build/
+
+### Kotlin Gradle plugin ###
+.kotlin/
 
 ### IntelliJ IDEA ###
 .idea/
@@ -11,8 +14,6 @@ build/
 *.ipr
 out/
 !**/src/**/out/
-
-.run/
 
 ### Eclipse ###
 .apt_generated
@@ -29,12 +30,16 @@ bin/
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
+### macOS ###
 .DS_Store
 
-### Minecraft Modding ###
+### Minecraft modding (datagen output, dev runs, local maven repo) ###
 run/
 !**/src/**/run/
 **/src/generated/**/.cache/
 repo/
 !**/src/**/repo/
+
+### Agent / tooling scratch dirs (not part of the mod source) ###
+.opencode/
+graphify-out/

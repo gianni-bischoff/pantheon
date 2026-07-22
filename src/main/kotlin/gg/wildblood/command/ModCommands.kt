@@ -99,7 +99,7 @@ object ModCommands {
         val displayName = StringArgumentType.getString(ctx, "displayName")
         val rl = runCatching { ResourceLocation.parse(idStr) }.getOrNull()
         if (rl == null) {
-            source.sendFailure(Component.literal("Invalid id: $idStr"))
+            source.sendFailure(Component.translatable("pantheon.command.faction.invalid_id", idStr))
             return 0
         }
         val pos = BlockPosArgument.getBlockPos(ctx, "pos")
@@ -125,7 +125,7 @@ object ModCommands {
         val factionIdStr = StringArgumentType.getString(ctx, "factionId")
         val rl = runCatching { ResourceLocation.parse(factionIdStr) }.getOrNull()
         if (rl == null) {
-            source.sendFailure(Component.literal("Invalid faction id: $factionIdStr"))
+            source.sendFailure(Component.translatable("pantheon.command.faction.invalid_id", factionIdStr))
             return 0
         }
         val data = PantheonSavedData.get(source.server)
@@ -144,7 +144,7 @@ object ModCommands {
         val factionIdStr = StringArgumentType.getString(ctx, "factionId")
         val rl = runCatching { ResourceLocation.parse(factionIdStr) }.getOrNull()
         if (rl == null) {
-            source.sendFailure(Component.literal("Invalid faction id: $factionIdStr"))
+            source.sendFailure(Component.translatable("pantheon.command.faction.invalid_id", factionIdStr))
             return 0
         }
         val data = PantheonSavedData.get(source.server)
@@ -164,7 +164,7 @@ object ModCommands {
         val data = PantheonSavedData.get(source.server)
         val factions = data.factions.values
         if (factions.isEmpty()) {
-            source.sendSuccess({ Component.literal("No factions") }, false)
+            source.sendSuccess({ Component.translatable("pantheon.command.faction.list.empty") }, false)
             return 0
         }
         source.sendSuccess({ Component.translatable("pantheon.command.faction.list.header", factions.size) }, false)

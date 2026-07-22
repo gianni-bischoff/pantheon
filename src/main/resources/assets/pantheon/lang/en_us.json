@@ -37,5 +37,7 @@
   "pantheon.command.faction.info.none": "No such faction: %s",
   "pantheon.command.faction.info.detail": "Faction %s — god: %s, mayor: %s, members: %d, skillpoints: %d",
   "pantheon.command.faction.list.header": "Factions (%d):",
-  "pantheon.command.faction.list.entry": "- %s (%s): %d members, god: %s"
+  "pantheon.command.faction.list.entry": "- %s (%s): %d members, god: %s",
+  "pantheon.command.faction.list.empty": "No factions",
+  "pantheon.command.faction.invalid_id": "Invalid faction id: %s"
 }

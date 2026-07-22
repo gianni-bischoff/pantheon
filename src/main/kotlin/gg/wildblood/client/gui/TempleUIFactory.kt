@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.UI
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement
 import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*
+import com.lowdragmc.lowdraglib2.gui.ui.Element
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
 import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
@@ -93,7 +94,7 @@ object TempleUIFactory {
         var selectedColor = 0
         val player = holder.player
         val server = player.server
-        val swatches = mutableListOf<UIElement>()
+        val swatches = mutableListOf<Element<UIElement>>()
 
         label({ text("pantheon.gui.faction_create.title", true) })
         label({ text("pantheon.gui.faction_create.name", true) })
@@ -115,7 +116,7 @@ object TempleUIFactory {
                     events { e -> UIEvents.CLICK on {
                         selectedColor = i
                         swatches.forEachIndexed { idx, s ->
-                            s.style.background(swatchTexture(DyeColor.byId(idx), idx == i))
+                            s.element.style.background(swatchTexture(DyeColor.byId(idx), idx == i))
                         }
                     } }
                 })
@@ -163,7 +164,7 @@ object TempleUIFactory {
         val player = holder.player
         val server = player.server
         val isAdmin = player.hasPermissions(2)
-        val swatches = mutableListOf<UIElement>()
+        val swatches = mutableListOf<Element<UIElement>>()
 
         label({ text("pantheon.gui.faction_manage.title", true) })
         label({ text("pantheon.gui.faction_create.name", true) })
@@ -185,7 +186,7 @@ object TempleUIFactory {
                     events { e -> UIEvents.CLICK on {
                         selectedColor = i
                         swatches.forEachIndexed { idx, s ->
-                            s.style.background(swatchTexture(DyeColor.byId(idx), idx == i))
+                            s.element.style.background(swatchTexture(DyeColor.byId(idx), idx == i))
                         }
                     } }
                 })

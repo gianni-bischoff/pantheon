@@ -97,7 +97,7 @@ object TempleUIFactory {
                 val dye = DyeColor.byId(i)
                 element({
                     layout = { width(20.px); height(20.px) }
-                    style = { background(ColorRectTexture(dye.mapColor.col)) }
+                    style = { background(ColorRectTexture(0xFF000000.toInt() or dye.mapColor.col)) }
                     events { e -> UIEvents.CLICK on { selectedColor = i } }
                 })
             }
@@ -159,7 +159,7 @@ object TempleUIFactory {
                 val dye = DyeColor.byId(i)
                 element({
                     layout = { width(20.px); height(20.px) }
-                    style = { background(ColorRectTexture(dye.mapColor.col)) }
+                    style = { background(ColorRectTexture(0xFF000000.toInt() or dye.mapColor.col)) }
                     events { e -> UIEvents.CLICK on { selectedColor = i } }
                 })
             }

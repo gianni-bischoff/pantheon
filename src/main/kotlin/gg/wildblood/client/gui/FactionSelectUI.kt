@@ -72,7 +72,7 @@ object FactionSelectUI {
                     }) {
                         element({
                             layout = { width(16.px); height(16.px) }
-                            style = { background(ColorRectTexture(DyeColor.byId(faction.color).mapColor.col)) }
+                            style = { background(ColorRectTexture(0xFF000000.toInt() or DyeColor.byId(faction.color).mapColor.col)) }
                         })
                         label({ text(faction.displayName, false) })
                         label({ text("pantheon.gui.faction_select.join", true) })

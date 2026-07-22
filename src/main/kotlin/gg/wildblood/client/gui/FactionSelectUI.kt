@@ -50,7 +50,7 @@ object FactionSelectUI {
     """.trimIndent()
 
     fun create(player: ServerPlayer): ModularUI {
-        val server = player.server
+        val server = player.server!!
         val data = PantheonSavedData.get(server)
 
         val root = element({ cls = { +"panel_bg" } }) {

@@ -59,14 +59,14 @@ object TempleUIFactory {
     """.trimIndent()
 
     fun createFactionUI(holder: BlockUIMenuType.BlockUIHolder): ModularUI {
-        val server = holder.player.server!!
-        val data = PantheonSavedData.get(server)
-        val faction = data.factions.values.find { it.anchor == holder.pos }
+        val server = holder.player.server
+        val data = server?.let { PantheonSavedData.get(it) }
+        val faction = data?.factions?.values?.find { it.anchor == holder.pos }
 
-        val root = if (faction == null) {
-            createNewFactionUI(holder, data)
+        val root = if (faction != null) {
+            createManageFactionUI(holder, data!!, faction)
         } else {
-            createManageFactionUI(holder, data, faction)
+            createNewFactionUI(holder, data)
         }
 
         val stylesheet = Stylesheet.parse(LSS)
@@ -75,12 +75,12 @@ object TempleUIFactory {
 
     private fun createNewFactionUI(
         holder: BlockUIMenuType.BlockUIHolder,
-        data: PantheonSavedData,
+        data: PantheonSavedData?,
     ) = element({ cls = { +"panel_bg" } }) {
         var name = ""
         var selectedColor = 0
         val player = holder.player
-        val server = holder.player.server!!
+        val server = player.server
 
         label({ text("pantheon.gui.faction_create.title", true) })
         label({ text("pantheon.gui.faction_create.name", true) })
@@ -117,11 +117,13 @@ object TempleUIFactory {
             events { e -> UIEvents.CLICK on {
                 if (name.isBlank()) return@on
                 val id = FactionId.fromDisplayName(name) ?: return@on
-                val existing = data.factions[id]
+                val s = server ?: return@on
+                val d = data ?: PantheonSavedData.get(s)
+                val existing = d.factions[id]
                 if (existing != null && existing.anchor != BlockPos.ZERO) return@on
-                val f = data.createFaction(name, selectedColor, holder.pos) ?: return@on
-                FactionTeamManager.syncFaction(server, f)
-                server.overworld().setBlock(
+                val f = d.createFaction(name, selectedColor, holder.pos) ?: return@on
+                FactionTeamManager.syncFaction(s, f)
+                s.overworld().setBlock(
                     holder.pos,
                     holder.blockState.setValue(TempleBlock.COLOR, DyeColor.byId(selectedColor)),
                     3
@@ -139,7 +141,7 @@ object TempleUIFactory {
         var name = faction.displayName
         var selectedColor = faction.color
         val player = holder.player
-        val server = holder.player.server!!
+        val server = player.server
         val isAdmin = player.hasPermissions(2)
 
         label({ text("pantheon.gui.faction_manage.title", true) })
@@ -167,7 +169,7 @@ object TempleUIFactory {
 
         element({ layout = { gap { all(2.px) }; flexDirection(FlexDirection.COLUMN) } }) {
             for (uuid in faction.members) {
-                val profile = server.profileCache?.get(uuid)?.orElse(null)
+                val profile = server?.profileCache?.get(uuid)?.orElse(null)
                 if (profile != null) {
                     label({ text("• ${profile.name}", false) })
                 }
@@ -180,9 +182,10 @@ object TempleUIFactory {
                 cls = { +"btn" }
             }) {
                 events { e -> UIEvents.CLICK on {
+                    val s = server ?: return@on
                     data.updateFaction(faction.id, name, selectedColor)
-                    FactionTeamManager.syncFaction(server, faction)
-                    server.overworld().setBlock(
+                    FactionTeamManager.syncFaction(s, faction)
+                    s.overworld().setBlock(
                         holder.pos,
                         holder.blockState.setValue(TempleBlock.COLOR, DyeColor.byId(selectedColor)),
                         3

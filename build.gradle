@@ -41,6 +41,11 @@ repositories {
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
         content { includeGroup "thedarkcolour" }
     }
+    // LDLib2 — UI/sync/persistence library
+    maven {
+        name = 'FirstDark Snapshots'
+        url = 'https://maven.firstdark.dev/snapshots'
+    }
 }
 
 base {
@@ -135,6 +140,9 @@ dependencies {
     // Kotlin for Forge (NeoForge variant). Provides Kotlin stdlib, coroutines, serialization,
     // and the kotlinforforge mod loader used to load object-based @Mod classes.
     implementation 'thedarkcolour:kotlinforforge-neoforge:5.10.0'
+
+    // LDLib2 — UI/sync/persistence library (https://github.com/Low-Drag-MC/LDLib2)
+    implementation "com.lowdragmc.ldlib2:ldlib2-neoforge-${minecraft_version}:${ldlib2_version}:all"
 
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

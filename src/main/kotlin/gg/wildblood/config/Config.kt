@@ -31,5 +31,20 @@ object Config {
             obj is String && BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(obj))
         }
 
+    val ISLAND_ANCHOR_A: ModConfigSpec.ConfigValue<String> = BUILDER
+        .comment("BlockPos of faction A's island anchor (Temple block). Format: 'x y z'")
+        .translation("pantheon.configuration.islandAnchorA")
+        .define("islandAnchorA", "0 100 0")
+
+    val ISLAND_ANCHOR_B: ModConfigSpec.ConfigValue<String> = BUILDER
+        .comment("BlockPos of faction B's island anchor (Temple block). Format: 'x y z'")
+        .translation("pantheon.configuration.islandAnchorB")
+        .define("islandAnchorB", "1000 100 0")
+
+    val DEFAULT_SEASON_DURATION_DAYS: ModConfigSpec.IntValue = BUILDER
+        .comment("Default season duration in days (0 = open-ended). Used by /pantheon season start with no arg.")
+        .translation("pantheon.configuration.defaultSeasonDurationDays")
+        .defineInRange("defaultSeasonDurationDays", 60, 0, 365)
+
     val SPEC: ModConfigSpec = BUILDER.build()
 }

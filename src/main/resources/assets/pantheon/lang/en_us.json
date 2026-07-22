@@ -16,5 +16,12 @@
   "pantheon.configuration.magicNumberIntroduction.tooltip": "What you want the introduction message to be for the magic number",
   "pantheon.configuration.items.tooltip": "A list of items to log on common setup",
   "pantheon.configuration.magicNumber.tooltip": "A magic number",
-  "pantheon.configuration.items.button": "Edit Item List"
+  "pantheon.configuration.items.button": "Edit Item List",
+
+  "pantheon.configuration.islandAnchorA": "Island A Anchor (Temple block position)",
+  "pantheon.configuration.islandAnchorA.tooltip": "BlockPos of faction A's island anchor (Temple block). Format: 'x y z'",
+  "pantheon.configuration.islandAnchorB": "Island B Anchor (Temple block position)",
+  "pantheon.configuration.islandAnchorB.tooltip": "BlockPos of faction B's island anchor (Temple block). Format: 'x y z'",
+  "pantheon.configuration.defaultSeasonDurationDays": "Default Season Duration (days, 0=open)",
+  "pantheon.configuration.defaultSeasonDurationDays.tooltip": "Default season duration in days (0 = open-ended). Used by /pantheon season start with no arg."
 }

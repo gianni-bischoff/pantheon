@@ -8,7 +8,6 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
 import com.lowdragmc.lowdraglib2.gui.ui.UI
 import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*
-import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import dev.vfyjxf.taffy.style.FlexDirection
 import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture
@@ -31,22 +30,22 @@ object FactionSelectUI {
             horizontal-align: center;
             color: 0xFFFFFFFF;
         }
-        .faction-row {
-            width: 100%;
-            height: 24;
-            padding-horizontal: 6;
-            gap-all: 4;
-            background: built-in(ui-gdp:RECT);
-        }
-        .faction-row:hover {
-            background: built-in(ui-gdp:RECT_SOLID);
-        }
         .btn {
             width: 80;
             height: 20;
             background: built-in(ui-gdp:RECT);
         }
         .btn:hover {
+            background: built-in(ui-gdp:RECT_SOLID);
+        }
+        .faction-btn {
+            width: 200;
+            height: 24;
+            padding-horizontal: 6;
+            gap-all: 4;
+            background: built-in(ui-gdp:RECT);
+        }
+        .faction-btn:hover {
             background: built-in(ui-gdp:RECT_SOLID);
         }
     """.trimIndent()
@@ -61,26 +60,19 @@ object FactionSelectUI {
 
             element({ layout = { gap { all(4.px) }; flexDirection(FlexDirection.COLUMN) } }) {
                 for (faction in data.factions.values) {
-                    element({
-                        cls = { +"faction-row" }
+                    button({
+                        cls = { +"faction-btn" }
                         layout = { width(200.px) }
-                        events { e -> UIEvents.CLICK on {
-                            val f = data.factions[faction.id] ?: return@on
-                            data.assignPlayerToFaction(player.uuid, f.id)
-                            player.setData(ModAttachments.FACTION.get(), f.id)
-                            FactionTeamManager.addPlayerToFaction(server, f, player.uuid, player.scoreboardName)
-                            player.closeContainer()
-                        } }
                     }) {
-                        element({
-                            layout = { width(16.px); height(16.px) }
-                            style = { background(GuiTextureGroup(
-                                ColorRectTexture(0xFF000000.toInt() or DyeColor.byId(faction.color).mapColor.col),
-                                ColorBorderTexture(0xFF555555.toInt(), 1)
-                            )) }
-                        })
-                        label({ text(faction.displayName, false) })
-                        label({ text("pantheon.gui.faction_select.join", true) })
+                        api {
+                            setOnServerClick { _ ->
+                                val f = data.factions[faction.id] ?: return@setOnServerClick
+                                data.assignPlayerToFaction(player.uuid, f.id)
+                                player.setData(ModAttachments.FACTION.get(), f.id)
+                                FactionTeamManager.addPlayerToFaction(server, f, player.uuid, player.scoreboardName)
+                                player.closeContainer()
+                            }
+                        }
                     }
                 }
             }
@@ -89,7 +81,9 @@ object FactionSelectUI {
                 text("pantheon.gui.faction_select.skip", true)
                 cls = { +"btn" }
             }) {
-                events { e -> UIEvents.CLICK on { player.closeContainer() } }
+                api {
+                    setOnServerClick { _ -> player.closeContainer() }
+                }
             }
         }
 

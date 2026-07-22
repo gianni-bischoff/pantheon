@@ -38,10 +38,6 @@ object TempleUIFactory {
             horizontal-align: center;
             color: 0xFFFFFFFF;
         }
-        .color-swatch {
-            width: 22;
-            height: 22;
-        }
         .btn {
             width: 80;
             height: 20;
@@ -71,6 +67,8 @@ object TempleUIFactory {
         }
     }
 
+    private fun dyeColor(index: Int): DyeColor = DyeColor.byId(index)
+
     fun createFactionUI(holder: BlockUIMenuType.BlockUIHolder): ModularUI {
         val server = holder.player.server
         val data = server?.let { PantheonSavedData.get(it) }
@@ -94,7 +92,7 @@ object TempleUIFactory {
         var selectedColor = 0
         val player = holder.player
         val server = player.server
-        val swatches = mutableListOf<Element<UIElement>>()
+        val swatchElements = mutableListOf<UIElement>()
 
         label({ text("pantheon.gui.faction_create.title", true) })
         label({ text("pantheon.gui.faction_create.name", true) })
@@ -108,19 +106,20 @@ object TempleUIFactory {
 
         element({ layout = { gap { all(3.px) }; wrap(FlexWrap.WRAP); flexDirection(FlexDirection.ROW) } }) {
             for (i in 0 until 16) {
-                val dye = DyeColor.byId(i)
-                val swatch = element({
-                    cls = { +"color-swatch" }
+                button({
                     layout = { width(22.px); height(22.px) }
-                    style = { background(swatchTexture(dye, i == 0)) }
-                    events { e -> UIEvents.CLICK on {
-                        selectedColor = i
-                        swatches.forEachIndexed { idx, s ->
-                            s.element.style.background(swatchTexture(DyeColor.byId(idx), idx == i))
+                    style = { background(swatchTexture(dyeColor(i), i == 0)) }
+                }) {
+                    swatchElements.add(this.element)
+                    api {
+                        setOnServerClick { _ ->
+                            selectedColor = i
+                            swatchElements.forEachIndexed { idx, el ->
+                                el.style.background(swatchTexture(dyeColor(idx), idx == i))
+                            }
                         }
-                    } }
-                })
-                swatches.add(swatch)
+                    }
+                }
             }
         }
 
@@ -135,22 +134,24 @@ object TempleUIFactory {
             text("pantheon.gui.faction_create.create", true)
             cls = { +"btn" }
         }) {
-            events { e -> UIEvents.CLICK on {
-                if (name.isBlank()) return@on
-                val id = FactionId.fromDisplayName(name) ?: return@on
-                val s = server ?: return@on
-                val d = data ?: PantheonSavedData.get(s)
-                val existing = d.factions[id]
-                if (existing != null && existing.anchor != BlockPos.ZERO) return@on
-                val f = d.createFaction(name, selectedColor, holder.pos) ?: return@on
-                FactionTeamManager.syncFaction(s, f)
-                s.overworld().setBlock(
-                    holder.pos,
-                    holder.blockState.setValue(TempleBlock.COLOR, DyeColor.byId(selectedColor)),
-                    3
-                )
-                player.closeContainer()
-            } }
+            api {
+                setOnServerClick { _ ->
+                    if (name.isBlank()) return@setOnServerClick
+                    val id = FactionId.fromDisplayName(name) ?: return@setOnServerClick
+                    val s = server ?: return@setOnServerClick
+                    val d = data ?: PantheonSavedData.get(s)
+                    val existing = d.factions[id]
+                    if (existing != null && existing.anchor != BlockPos.ZERO) return@setOnServerClick
+                    val f = d.createFaction(name, selectedColor, holder.pos) ?: return@setOnServerClick
+                    FactionTeamManager.syncFaction(s, f)
+                    s.overworld().setBlock(
+                        holder.pos,
+                        holder.blockState.setValue(TempleBlock.COLOR, DyeColor.byId(selectedColor)),
+                        3
+                    )
+                    player.closeContainer()
+                }
+            }
         }
     }
 
@@ -164,7 +165,7 @@ object TempleUIFactory {
         val player = holder.player
         val server = player.server
         val isAdmin = player.hasPermissions(2)
-        val swatches = mutableListOf<Element<UIElement>>()
+        val swatchElements = mutableListOf<UIElement>()
 
         label({ text("pantheon.gui.faction_manage.title", true) })
         label({ text("pantheon.gui.faction_create.name", true) })
@@ -178,19 +179,20 @@ object TempleUIFactory {
 
         element({ layout = { gap { all(3.px) }; wrap(FlexWrap.WRAP); flexDirection(FlexDirection.ROW) } }) {
             for (i in 0 until 16) {
-                val dye = DyeColor.byId(i)
-                val swatch = element({
-                    cls = { +"color-swatch" }
+                button({
                     layout = { width(22.px); height(22.px) }
-                    style = { background(swatchTexture(dye, i == selectedColor)) }
-                    events { e -> UIEvents.CLICK on {
-                        selectedColor = i
-                        swatches.forEachIndexed { idx, s ->
-                            s.element.style.background(swatchTexture(DyeColor.byId(idx), idx == i))
+                    style = { background(swatchTexture(dyeColor(i), i == selectedColor)) }
+                }) {
+                    swatchElements.add(this.element)
+                    api {
+                        setOnServerClick { _ ->
+                            selectedColor = i
+                            swatchElements.forEachIndexed { idx, el ->
+                                el.style.background(swatchTexture(dyeColor(idx), idx == i))
+                            }
                         }
-                    } }
-                })
-                swatches.add(swatch)
+                    }
+                }
             }
         }
 
@@ -210,24 +212,28 @@ object TempleUIFactory {
                 text("pantheon.gui.faction_manage.save", true)
                 cls = { +"btn" }
             }) {
-                events { e -> UIEvents.CLICK on {
-                    val s = server ?: return@on
-                    data.updateFaction(faction.id, name, selectedColor)
-                    FactionTeamManager.syncFaction(s, faction)
-                    s.overworld().setBlock(
-                        holder.pos,
-                        holder.blockState.setValue(TempleBlock.COLOR, DyeColor.byId(selectedColor)),
-                        3
-                    )
-                    player.closeContainer()
-                } }
+                api {
+                    setOnServerClick { _ ->
+                        val s = server ?: return@setOnServerClick
+                        data.updateFaction(faction.id, name, selectedColor)
+                        FactionTeamManager.syncFaction(s, faction)
+                        s.overworld().setBlock(
+                            holder.pos,
+                            holder.blockState.setValue(TempleBlock.COLOR, DyeColor.byId(selectedColor)),
+                            3
+                        )
+                        player.closeContainer()
+                    }
+                }
             }
         } else {
             button({
                 text("pantheon.gui.faction_manage.close", true)
                 cls = { +"btn" }
             }) {
-                events { e -> UIEvents.CLICK on { player.closeContainer() } }
+                api {
+                    setOnServerClick { _ -> player.closeContainer() }
+                }
             }
         }
     }

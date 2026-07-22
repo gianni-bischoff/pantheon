@@ -1,25 +1,68 @@
+# Pantheon
 
-Installation information
-=======
+A seasonal faith/belief gameplay mod for Minecraft **1.21.1** on **NeoForge**.
+Each day, players vote to decide which city god is empowered — the winner unlocks buffs, goals, and seasonal mechanics that shape where your city develops.
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+**Status:** scaffolded — feature development starting now.
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+---
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+## Tech stack
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+| | |
+|---|---|
+| Minecraft | 1.21.1 |
+| NeoForge | 21.1.x |
+| Mod loader | KotlinForForge 5.10.0 (`kotlinforforge`) |
+| Language | Kotlin (JVM 21), no Java sources |
+| Build | Gradle (Groovy DSL) + `net.neoforged.moddev` |
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+## Building
+
+```bash
+# Compile only (fast check)
+./gradlew compileKotlin --no-daemon --no-configuration-cache
+
+# Full build (compiles + resources + jar)
+./gradlew build --no-daemon --no-configuration-cache
+```
+
+> On WSL, always pass `--no-daemon --no-configuration-cache`. If you hit `Input/output error` on Gradle cache locks, delete `.gradle/` and retry.
+
+## Running
+
+```bash
+# Dev client
+./gradlew runClient --no-daemon --no-configuration-cache
+
+# Dev dedicated server
+./gradlew runServer --no-daemon --no-configuration-cache
+
+# Regenerate data/assets → src/generated/resources
+./gradlew runData --no-daemon --no-configuration-cache
+```
+
+## Project layout
+
+```
+gg.wildblood
+├── Pantheon.kt            @Mod object, registry wiring, event listeners
+├── block/                 Blocks
+├── blockentity/           Block entities
+├── item/                  Items + creative tabs
+├── entity/                Entities
+├── client/                Client-only setup + screens
+├── gui/                   Shared menus/containers
+├── command/               Commands
+├── network/               Custom payloads
+├── data/                  Data generation
+├── config/                ModConfigSpec
+├── util/                  Side-safe helpers
+└── mixin/                 Mixins
+```
+
+See [`AGENTS.md`](AGENTS.md) for the full development guidelines (build commands, code conventions, registration patterns, sidedness rules).
+
+## License
+
+All Rights Reserved unless otherwise noted. `TEMPLATE_LICENSE.txt` covers original NeoForged MDK template files.

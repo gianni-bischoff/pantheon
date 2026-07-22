@@ -1,72 +1,61 @@
 package gg.wildblood
 
 import com.mojang.logging.LogUtils
+import gg.wildblood.block.ModBlocks
+import gg.wildblood.blockentity.ModBlockEntities
+import gg.wildblood.config.Config
+import gg.wildblood.data.ModDataGenerator
+import gg.wildblood.entity.ModEntities
+import gg.wildblood.item.ModCreativeTabs
+import gg.wildblood.item.ModItems
 import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.core.registries.Registries
-import net.minecraft.network.chat.Component
-import net.minecraft.world.food.FoodProperties
-import net.minecraft.world.item.BlockItem
-import net.minecraft.world.item.CreativeModeTab
-import net.minecraft.world.item.CreativeModeTabs
-import net.minecraft.world.item.Item
-import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.state.BlockBehaviour
-import net.minecraft.world.level.material.MapColor
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.Mod
 import net.neoforged.fml.config.ModConfig
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
 import net.neoforged.neoforge.common.NeoForge
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent
+import net.neoforged.neoforge.data.event.GatherDataEvent
 import net.neoforged.neoforge.event.server.ServerStartingEvent
-import net.neoforged.neoforge.registries.DeferredBlock
-import net.neoforged.neoforge.registries.DeferredHolder
-import net.neoforged.neoforge.registries.DeferredItem
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
 import net.neoforged.neoforge.registries.DeferredRegister
+import net.neoforged.neoforge.registries.RegisterEvent
 import org.slf4j.Logger
 import thedarkcolour.kotlinforforge.neoforge.forge.LOADING_CONTEXT
 import thedarkcolour.kotlinforforge.neoforge.forge.MOD_BUS
 
+/**
+ * Pantheon mod root.
+ *
+ * This object is the single [Mod]-annotated entrypoint loaded by KotlinForForge.
+ * All [DeferredRegister] hubs in `Mod*` companion objects are wired up here so
+ * there is one obvious place to see what the mod registers.
+ *
+ * Per-feature logic should live in its own package (block, item, entity, ...).
+ * Keep this file a thin registry/wiring hub - add feature code in dedicated
+ * packages instead of growing this object.
+ */
 @Mod(Pantheon.MODID)
 object Pantheon {
     const val MODID = "pantheon"
     val LOGGER: Logger = LogUtils.getLogger()
 
-    val BLOCKS: DeferredRegister.Blocks = DeferredRegister.createBlocks(MODID)
-    val ITEMS: DeferredRegister.Items = DeferredRegister.createItems(MODID)
-    val CREATIVE_MODE_TABS: DeferredRegister<CreativeModeTab> = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID)
-
-    val EXAMPLE_BLOCK: DeferredBlock<Block> =
-        BLOCKS.registerSimpleBlock("example_block", BlockBehaviour.Properties.of().mapColor(MapColor.STONE))
-
-    val EXAMPLE_BLOCK_ITEM: DeferredItem<BlockItem> = ITEMS.registerSimpleBlockItem("example_block", EXAMPLE_BLOCK)
-
-    val EXAMPLE_ITEM: DeferredItem<Item> = ITEMS.registerSimpleItem(
-        "example_item",
-        Item.Properties().food(
-            FoodProperties.Builder().alwaysEdible().nutrition(1).saturationModifier(2f).build(),
-        ),
+    /** All DeferredRegisters that should fire on the mod event bus. */
+    private val REGISTRIES: List<DeferredRegister<*>> = listOf(
+        ModBlocks.REGISTRY,
+        ModItems.REGISTRY,
+        ModCreativeTabs.REGISTRY,
+        ModEntities.REGISTRY,
+        ModBlockEntities.REGISTRY,
     )
-
-    val EXAMPLE_TAB: DeferredHolder<CreativeModeTab, CreativeModeTab> = CREATIVE_MODE_TABS.register("example_tab") { ->
-        CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.pantheon"))
-            .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon { EXAMPLE_ITEM.get().defaultInstance }
-            .displayItems { _, output ->
-                output.accept(EXAMPLE_ITEM.get())
-            }
-            .build()
-    }
 
     init {
         MOD_BUS.addListener(::commonSetup)
-        MOD_BUS.addListener(::addCreative)
+        MOD_BUS.addListener(::onRegister)
+        MOD_BUS.addListener(::onRegisterPayloads)
+        MOD_BUS.addListener(ModDataGenerator::onGatherData)
 
-        BLOCKS.register(MOD_BUS)
-        ITEMS.register(MOD_BUS)
-        CREATIVE_MODE_TABS.register(MOD_BUS)
+        REGISTRIES.forEach { it.register(MOD_BUS) }
 
         NeoForge.EVENT_BUS.register(this)
 
@@ -85,10 +74,13 @@ object Pantheon {
         Config.ITEM_STRINGS.get().forEach { item -> LOGGER.info("ITEM >> {}", item) }
     }
 
-    private fun addCreative(event: BuildCreativeModeTabContentsEvent) {
-        if (event.tabKey == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(EXAMPLE_BLOCK_ITEM)
-        }
+    private fun onRegister(event: RegisterEvent) {
+        // Cross-registry fixups that need to run at register time go here.
+        // Prefer adding entries directly to the relevant Mod* object over using this.
+    }
+
+    private fun onRegisterPayloads(event: RegisterPayloadHandlersEvent) {
+        gg.wildblood.network.ModPayloads.register(event.registrar("1"))
     }
 
     @SubscribeEvent

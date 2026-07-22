@@ -1,9 +1,15 @@
-package gg.wildblood
+package gg.wildblood.config
 
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import net.neoforged.neoforge.common.ModConfigSpec
 
+/**
+ * Pantheon common config.
+ *
+ * Values are accessed as [ModConfigSpec] typed properties on this object.
+ * The built [SPEC] is registered with the mod container in [gg.wildblood.Pantheon].
+ */
 object Config {
     private val BUILDER = ModConfigSpec.Builder()
 

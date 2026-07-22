@@ -14,6 +14,9 @@ object ModItems {
     val EXAMPLE_BLOCK_ITEM: DeferredItem<BlockItem> =
         REGISTRY.registerSimpleBlockItem("example_block", ModBlocks.EXAMPLE_BLOCK)
 
+    val TEMPLE_ITEM: DeferredItem<BlockItem> =
+        REGISTRY.registerSimpleBlockItem("temple", ModBlocks.TEMPLE)
+
     val EXAMPLE_ITEM: DeferredItem<Item> = REGISTRY.registerSimpleItem(
         "example_item",
         Item.Properties().food(

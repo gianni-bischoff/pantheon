@@ -18,6 +18,7 @@ object ModCreativeTabs {
             .icon { ModItems.EXAMPLE_ITEM.get().defaultInstance }
             .displayItems { _, output ->
                 output.accept(ModItems.EXAMPLE_ITEM.get())
+                output.accept(ModItems.TEMPLE_ITEM.get())
             }
             .build()
     }

@@ -12,4 +12,8 @@ object ModBlocks {
 
     val EXAMPLE_BLOCK: DeferredBlock<Block> =
         REGISTRY.registerSimpleBlock("example_block", BlockBehaviour.Properties.of().mapColor(MapColor.STONE))
+
+    val TEMPLE: DeferredBlock<TempleBlock> =
+        REGISTRY.registerBlock("temple", ::TempleBlock,
+            BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).strength(3.5f).requiresCorrectToolForDrops())
 }

@@ -12,13 +12,11 @@ class TempleBlock(properties: Properties) : Block(properties), EntityBlock {
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity =
         TempleBlockEntity(pos, state)
 
-    override fun playerWillDestroy(
-        level: Level, pos: BlockPos, state: BlockState, player: net.minecraft.world.entity.player.Player,
-    ): BlockState {
-        if (!player.isCreative) {
-            level.setBlock(pos, state, Block.UPDATE_CLIENTS)
-            return state
-        }
-        return super.playerWillDestroy(level, pos, state, player)
+    override fun onDestroyedByPlayer(
+        state: BlockState, level: Level, pos: BlockPos, player: net.minecraft.world.entity.player.Player,
+        willHarvest: Boolean, fluid: net.minecraft.world.level.material.FluidState,
+    ): Boolean {
+        if (!player.isCreative) return false
+        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid)
     }
 }

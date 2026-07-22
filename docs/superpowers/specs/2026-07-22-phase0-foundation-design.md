@@ -97,7 +97,7 @@ data class Faction(
 }
 ```
 
-- Exactly two factions per season (enforced at creation). Faction ids are fixed constants for v1 (`pantheon:sunkeep`, `pantheon:voidspire`); admin can rename display name via command.
+- Exactly two factions per season (enforced at creation). **Faction ids are admin-chosen at creation** via `/pantheon faction create <id> <displayName> ...` — no hardcoded ids. The `<id>` must be a valid `ResourceLocation` (e.g. `pantheon:sunkeep`, `pantheon:voidspire`, or any namespace:path the admin picks). Display name is also admin-chosen.
 - `godId`, `mayor`, `skillpointPool`, `skilltreeState` are placeholders in Phase 0 — they exist in the schema so later phases fill them without a migration. They're always null/0/empty in Phase 0 runtime.
 
 ### 4.3 Player attachments
@@ -177,6 +177,7 @@ Hand-written NBT (not Codec) for SavedData — matches the NeoForge doc pattern 
 
 - `Block` subclass implementing `EntityBlock`.
 - `BlockBehaviour.Properties`: strength 3.5F, requires correct tool, no drops by default (Temple is indestructible admin-placed; destruction handled in Phase 1 no-build zone).
+- **Creative-only break:** override `getDestroyProgress` / `canHarvestBlock` (or use `BlockBehaviour.Properties.dynamicShape().noOcclusion()` + a `PlayerDestroyItem`/`BlockEvent.BreakEvent` cancel for non-creative). Simplest 1.21.1 approach: override `Block.playerWillDestroy(level, pos, state, player)` and `Block.playerDestroy(...)` — if `!player.isCreative`, cancel the break (restore the block, return early). This makes the Temple unbreakable except in creative mode, without needing the Phase 1 no-build zone.
 - `newBlockEntity(pos, state)` → `TempleBlockEntity`.
 - No `use` interaction in Phase 0 (UI deferred to Phase 2+). Right-click is a no-op for now.
 
@@ -370,7 +371,7 @@ NeoForge.EVENT_BUS.addListener(::onRegisterCommands)  // NEW
 
 - `testSeasonStart`: `/pantheon season start 7` → SavedData has `season` with `phase=CREATED`, `endsAt > startedAt`.
 - `testSeasonEnd`: start then `end` → `phase=ENDED`.
-- `testFactionCreate`: place Temple block at known pos → `/pantheon faction create pantheon:sunkeep Sunkeep X Y Z` → SavedData has faction, anchor matches.
+- `testFactionCreate`: place Temple block at known pos → `/pantheon faction create pantheon:test_a TestA X Y Z` → SavedData has faction with id `pantheon:test_a`, anchor matches.
 - `testFactionAssign`: create faction → assign a fake player → player attachment is set, `faction.members` contains UUID.
 - `testTempleMirror`: create faction + Temple BE → tick 20 times → BE `factionId`/`memberCount` match SavedData.
 - `testPersistence`: start season, create factions, save world, reload → SavedData reloads with same state.
@@ -420,7 +421,7 @@ Added to `src/main/resources/assets/pantheon/lang/en_us.json`:
 
 1. `./gradlew build --no-daemon --no-configuration-cache` succeeds.
 2. `./gradlew gameTestServer --no-daemon --no-configuration-cache` passes all Phase 0 GameTests.
-3. A server op can run `/pantheon season start 7`, `/pantheon faction create pantheon:sunkeep Sunkeep <x> <y> <z>`, `/pantheon faction assign <player> pantheon:sunkeep`, `/pantheon season info`, `/pantheon faction info pantheon:sunkeep` and see correct output.
+3. A server op can run `/pantheon season start 7`, `/pantheon faction create pantheon:test_a TestA <x> <y> <z>`, `/pantheon faction assign <player> pantheon:test_a`, `/pantheon season info`, `/pantheon faction info pantheon:test_a` and see correct output.
 4. After a server restart, `/pantheon season info` and `/pantheon faction info` return the same state (SavedData persisted).
 5. A Temple block placed in the world and linked to a faction shows mirrored `factionId`/`memberCount` on its BE (verifiable via F3 or a debug command).
 6. No client-only class is referenced outside `gg.wildblood.client`.
@@ -428,6 +429,6 @@ Added to `src/main/resources/assets/pantheon/lang/en_us.json`:
 ## 15. Open questions for user review
 
 1. **Temple block creative-tab placement:** ~~should it appear in the Pantheon creative tab~~ → **decided: yes, added to `EXAMPLE_TAB`** (per §5.3). Confirm you're OK with this.
-2. **Faction ids:** I hardcoded `pantheon:sunkeep` and `pantheon:voidspire` as the two faction ids. Keep these, or want different names?
+2. **Faction ids:** ~~hardcoded `pantheon:sunkeep`/`pantheon:voidspire`~~ → **decided: admin-chosen at creation** (per §4.2). The `/pantheon faction create <id> ...` command takes any valid `ResourceLocation` as the id.
 3. **Open-ended season:** `endsAt = 0` means no auto-end. Confirm this is desired (admin ends manually via `/pantheon season end`).
-4. **Temple block destruction:** Phase 0 doesn't implement indestructibility (that's Phase 1 no-build zone). For now the Temple is a normal breakable block. OK for Phase 0, or want explosion-resistance + creative-only break now?
+4. **Temple block destruction:** ~~normal breakable block~~ → **decided: creative-only break** (per §5.1). Non-creative players cannot break the Temple; creative players can.

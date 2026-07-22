@@ -12,6 +12,8 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import dev.vfyjxf.taffy.style.FlexDirection
 import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture
+import com.lowdragmc.lowdraglib2.gui.texture.ColorBorderTexture
+import com.lowdragmc.lowdraglib2.gui.texture.GuiTextureGroup
 import com.lowdragmc.lowdraglib2.gui.ui.style.Stylesheet
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -72,7 +74,10 @@ object FactionSelectUI {
                     }) {
                         element({
                             layout = { width(16.px); height(16.px) }
-                            style = { background(ColorRectTexture(0xFF000000.toInt() or DyeColor.byId(faction.color).mapColor.col)) }
+                            style = { background(GuiTextureGroup(
+                                ColorRectTexture(0xFF000000.toInt() or DyeColor.byId(faction.color).mapColor.col),
+                                ColorBorderTexture(0xFF555555.toInt(), 1)
+                            )) }
                         })
                         label({ text(faction.displayName, false) })
                         label({ text("pantheon.gui.faction_select.join", true) })

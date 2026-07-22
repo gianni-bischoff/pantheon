@@ -9,6 +9,7 @@ import gg.wildblood.faction.FactionTeamManager
 import gg.wildblood.faction.PantheonSavedData
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
 import com.lowdragmc.lowdraglib2.gui.ui.UI
+import com.lowdragmc.lowdraglib2.gui.ui.UIElement
 import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
@@ -17,6 +18,8 @@ import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import dev.vfyjxf.taffy.style.FlexDirection
 import dev.vfyjxf.taffy.style.FlexWrap
 import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture
+import com.lowdragmc.lowdraglib2.gui.texture.ColorBorderTexture
+import com.lowdragmc.lowdraglib2.gui.texture.GuiTextureGroup
 import com.lowdragmc.lowdraglib2.gui.ui.style.Stylesheet
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
@@ -35,8 +38,8 @@ object TempleUIFactory {
             color: 0xFFFFFFFF;
         }
         .color-swatch {
-            width: 20;
-            height: 20;
+            width: 22;
+            height: 22;
         }
         .btn {
             width: 80;
@@ -57,6 +60,15 @@ object TempleUIFactory {
             background: built-in(ui-gdp:RECT_SOLID);
         }
     """.trimIndent()
+
+    private fun swatchTexture(dye: DyeColor, selected: Boolean): GuiTextureGroup {
+        val fill = ColorRectTexture(0xFF000000.toInt() or dye.mapColor.col)
+        return if (selected) {
+            GuiTextureGroup(fill, ColorBorderTexture(0xFFFFFFFF.toInt(), 3))
+        } else {
+            GuiTextureGroup(fill, ColorBorderTexture(0xFF555555.toInt(), 1))
+        }
+    }
 
     fun createFactionUI(holder: BlockUIMenuType.BlockUIHolder): ModularUI {
         val server = holder.player.server
@@ -81,6 +93,7 @@ object TempleUIFactory {
         var selectedColor = 0
         val player = holder.player
         val server = player.server
+        val swatches = mutableListOf<UIElement>()
 
         label({ text("pantheon.gui.faction_create.title", true) })
         label({ text("pantheon.gui.faction_create.name", true) })
@@ -92,14 +105,21 @@ object TempleUIFactory {
 
         label({ text("pantheon.gui.faction_create.color", true) })
 
-        element({ layout = { gap { all(2.px) }; wrap(FlexWrap.WRAP); flexDirection(FlexDirection.ROW) } }) {
+        element({ layout = { gap { all(3.px) }; wrap(FlexWrap.WRAP); flexDirection(FlexDirection.ROW) } }) {
             for (i in 0 until 16) {
                 val dye = DyeColor.byId(i)
-                element({
-                    layout = { width(20.px); height(20.px) }
-                    style = { background(ColorRectTexture(0xFF000000.toInt() or dye.mapColor.col)) }
-                    events { e -> UIEvents.CLICK on { selectedColor = i } }
+                val swatch = element({
+                    cls = { +"color-swatch" }
+                    layout = { width(22.px); height(22.px) }
+                    style = { background(swatchTexture(dye, i == 0)) }
+                    events { e -> UIEvents.CLICK on {
+                        selectedColor = i
+                        swatches.forEachIndexed { idx, s ->
+                            s.style.background(swatchTexture(DyeColor.byId(idx), idx == i))
+                        }
+                    } }
                 })
+                swatches.add(swatch)
             }
         }
 
@@ -143,6 +163,7 @@ object TempleUIFactory {
         val player = holder.player
         val server = player.server
         val isAdmin = player.hasPermissions(2)
+        val swatches = mutableListOf<UIElement>()
 
         label({ text("pantheon.gui.faction_manage.title", true) })
         label({ text("pantheon.gui.faction_create.name", true) })
@@ -154,14 +175,21 @@ object TempleUIFactory {
 
         label({ text("pantheon.gui.faction_create.color", true) })
 
-        element({ layout = { gap { all(2.px) }; flexDirection(FlexDirection.ROW); wrap(FlexWrap.WRAP) } }) {
+        element({ layout = { gap { all(3.px) }; wrap(FlexWrap.WRAP); flexDirection(FlexDirection.ROW) } }) {
             for (i in 0 until 16) {
                 val dye = DyeColor.byId(i)
-                element({
-                    layout = { width(20.px); height(20.px) }
-                    style = { background(ColorRectTexture(0xFF000000.toInt() or dye.mapColor.col)) }
-                    events { e -> UIEvents.CLICK on { selectedColor = i } }
+                val swatch = element({
+                    cls = { +"color-swatch" }
+                    layout = { width(22.px); height(22.px) }
+                    style = { background(swatchTexture(dye, i == selectedColor)) }
+                    events { e -> UIEvents.CLICK on {
+                        selectedColor = i
+                        swatches.forEachIndexed { idx, s ->
+                            s.style.background(swatchTexture(DyeColor.byId(idx), idx == i))
+                        }
+                    } }
                 })
+                swatches.add(swatch)
             }
         }
 

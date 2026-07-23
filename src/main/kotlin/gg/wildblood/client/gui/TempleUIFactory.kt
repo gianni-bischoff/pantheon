@@ -10,7 +10,6 @@ import com.lowdragmc.lowdraglib2.gui.ui.UI
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement
 import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*
-import com.lowdragmc.lowdraglib2.gui.ui.Element
 import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import dev.vfyjxf.taffy.style.FlexDirection
@@ -24,6 +23,8 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.DyeColor
 
 object TempleUIFactory {
+
+    private val DYE_COLORS = DyeColor.entries
 
     private val LSS = """
         .panel_bg {
@@ -43,24 +44,28 @@ object TempleUIFactory {
         .btn:hover {
             background: built-in(ui-gdp:RECT_SOLID);
         }
+        .swatch {
+            width: 22;
+            height: 22;
+        }
+        .swatch.selected {
+            border: 3;
+            border-color: 0xFFFFFFFF;
+        }
+        .swatch.unselected {
+            border: 1;
+            border-color: 0xFF666666;
+        }
     """.trimIndent()
 
-    private fun swatchTexture(dye: DyeColor, selected: Boolean): GuiTextureGroup {
-        val fill = ColorRectTexture(0xFF000000.toInt() or dye.mapColor.col)
-        return if (selected) {
-            GuiTextureGroup(fill, ColorBorderTexture(0xFFFFFFFF.toInt(), 3))
-        } else {
-            GuiTextureGroup(fill, ColorBorderTexture(0xFF666666.toInt(), 1))
-        }
-    }
-
-    private fun dyeColor(index: Int): DyeColor = DyeColor.byId(index)
+    private fun swatchTexture(dye: DyeColor): ColorRectTexture =
+        ColorRectTexture(0xFF000000.toInt() or dye.mapColor.col)
 
     fun createFactionUI(holder: BlockUIMenuType.BlockUIHolder): ModularUI {
         val server = holder.player.server
         val data = server?.let { PantheonSavedData.get(it) }
         val faction = data?.factions?.values?.find { it.anchor == holder.pos }
-        val be = server?.overworld()?.getBlockEntity(holder.pos) as? gg.wildblood.blockentity.TempleBlockEntity
+        val be = holder.player.level().getBlockEntity(holder.pos) as? gg.wildblood.blockentity.TempleBlockEntity
 
         val root = if (faction != null) {
             createManageFactionUI(holder, faction, be)
@@ -94,13 +99,16 @@ object TempleUIFactory {
             for (i in 0 until 16) {
                 button({
                     noText(); active = true
+                    cls = { +"swatch"; +if (i == 0) "selected" else "unselected" }
                     layout = { width(22.px); height(22.px) }
-                    style = { background(swatchTexture(dyeColor(i), i == 0)) }
+                    style = { background(swatchTexture(dyeColor(i))) }
                     onClick = {
-                        gg.wildblood.Pantheon.LOGGER.info("SWATCH CLICK {}", i)
+                        Pantheon.LOGGER.info("SWATCH CLICK {}", i)
                         selectedColor = i
                         swatchElements.forEachIndexed { idx, el ->
-                            el.style.background(swatchTexture(dyeColor(idx), idx == i))
+                            el.removeClass("selected")
+                            el.removeClass("unselected")
+                            el.addClass(if (idx == i) "selected" else "unselected")
                         }
                     }
                 }) {
@@ -120,7 +128,7 @@ object TempleUIFactory {
             text("pantheon.gui.faction_create.create", true)
             cls = { +"btn" }; active = true
             onClick = {
-                gg.wildblood.Pantheon.LOGGER.info("CREATE CLICK name={} color={} be={}", name, selectedColor, be)
+                Pantheon.LOGGER.info("CREATE CLICK name={} color={} be={}", name, selectedColor, be)
                 if (name.isNotBlank()) {
                     be?.rpcToServer("rpcCreateFaction", name, selectedColor)
                 }
@@ -154,12 +162,15 @@ object TempleUIFactory {
             for (i in 0 until 16) {
                 button({
                     noText(); active = true
+                    cls = { +"swatch"; +if (i == selectedColor) "selected" else "unselected" }
                     layout = { width(22.px); height(22.px) }
-                    style = { background(swatchTexture(dyeColor(i), i == selectedColor)) }
-                    onClick = { _ ->
+                    style = { background(swatchTexture(dyeColor(i))) }
+                    onClick = {
                         selectedColor = i
                         swatchElements.forEachIndexed { idx, el ->
-                            el.style.background(swatchTexture(dyeColor(idx), idx == i))
+                            el.removeClass("selected")
+                            el.removeClass("unselected")
+                            el.addClass(if (idx == i) "selected" else "unselected")
                         }
                     }
                 }) {
@@ -183,7 +194,7 @@ object TempleUIFactory {
             button({
                 text("pantheon.gui.faction_manage.save", true)
                 cls = { +"btn" }; active = true
-                onClick = { _ ->
+                onClick = {
                     be?.rpcToServer("rpcUpdateFaction", name, selectedColor)
                 }
             })
@@ -191,8 +202,10 @@ object TempleUIFactory {
             button({
                 text("pantheon.gui.faction_manage.close", true)
                 cls = { +"btn" }; active = true
-                onClick = { _ -> player.closeContainer() }
+                onClick = { player.closeContainer() }
             })
         }
     }
+
+    private fun dyeColor(index: Int): DyeColor = DyeColor.byId(index)
 }

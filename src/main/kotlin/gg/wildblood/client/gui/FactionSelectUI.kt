@@ -10,13 +10,9 @@ import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import dev.vfyjxf.taffy.style.FlexDirection
-import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture
-import com.lowdragmc.lowdraglib2.gui.texture.ColorBorderTexture
-import com.lowdragmc.lowdraglib2.gui.texture.GuiTextureGroup
 import com.lowdragmc.lowdraglib2.gui.ui.style.Stylesheet
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.item.DyeColor
 
 object FactionSelectUI {
 
@@ -63,28 +59,24 @@ object FactionSelectUI {
                     button({
                         cls = { +"faction-btn" }
                         layout = { width(200.px) }
-                    }) {
-                        api {
-                            setOnServerClick { _ ->
-                                val f = data.factions[faction.id] ?: return@setOnServerClick
+                        onServerClick = {
+                            val f = data.factions[faction.id]
+                            if (f != null) {
                                 data.assignPlayerToFaction(player.uuid, f.id)
                                 player.setData(ModAttachments.FACTION.get(), f.id)
                                 FactionTeamManager.addPlayerToFaction(server, f, player.uuid, player.scoreboardName)
                                 player.closeContainer()
                             }
                         }
-                    }
+                    })
                 }
             }
 
             button({
                 text("pantheon.gui.faction_select.skip", true)
                 cls = { +"btn" }
-            }) {
-                api {
-                    setOnServerClick { _ -> player.closeContainer() }
-                }
-            }
+                onServerClick = { _ -> player.closeContainer() }
+            })
         }
 
         val stylesheet = Stylesheet.parse(LSS)

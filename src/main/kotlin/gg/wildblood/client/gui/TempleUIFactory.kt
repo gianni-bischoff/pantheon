@@ -96,16 +96,14 @@ object TempleUIFactory {
                     noText()
                     layout = { width(22.px); height(22.px) }
                     style = { background(swatchTexture(dyeColor(i), i == 0)) }
-                }) {
-                    swatchElements.add(this.element)
-                    api {
-                        setOnClick { _ ->
-                            selectedColor = i
-                            swatchElements.forEachIndexed { idx, el ->
-                                el.style.background(swatchTexture(dyeColor(idx), idx == i))
-                            }
+                    onClick = { _ ->
+                        selectedColor = i
+                        swatchElements.forEachIndexed { idx, el ->
+                            el.style.background(swatchTexture(dyeColor(idx), idx == i))
                         }
                     }
+                }) {
+                    swatchElements.add(this.element)
                 }
             }
         }
@@ -120,14 +118,12 @@ object TempleUIFactory {
         button({
             text("pantheon.gui.faction_create.create", true)
             cls = { +"btn" }
-        }) {
-            api {
-                setOnClick { _ ->
-                    if (name.isBlank()) return@setOnClick
+            onClick = {
+                if (name.isNotBlank()) {
                     be?.rpcToServer("rpcCreateFaction", name, selectedColor)
                 }
             }
-        }
+        })
     }
 
     private fun createManageFactionUI(
@@ -158,16 +154,14 @@ object TempleUIFactory {
                     noText()
                     layout = { width(22.px); height(22.px) }
                     style = { background(swatchTexture(dyeColor(i), i == selectedColor)) }
-                }) {
-                    swatchElements.add(this.element)
-                    api {
-                        setOnClick { _ ->
-                            selectedColor = i
-                            swatchElements.forEachIndexed { idx, el ->
-                                el.style.background(swatchTexture(dyeColor(idx), idx == i))
-                            }
+                    onClick = { _ ->
+                        selectedColor = i
+                        swatchElements.forEachIndexed { idx, el ->
+                            el.style.background(swatchTexture(dyeColor(idx), idx == i))
                         }
                     }
+                }) {
+                    swatchElements.add(this.element)
                 }
             }
         }
@@ -187,22 +181,16 @@ object TempleUIFactory {
             button({
                 text("pantheon.gui.faction_manage.save", true)
                 cls = { +"btn" }
-            }) {
-                api {
-                    setOnClick { _ ->
-                        be?.rpcToServer("rpcUpdateFaction", name, selectedColor)
-                    }
+                onClick = { _ ->
+                    be?.rpcToServer("rpcUpdateFaction", name, selectedColor)
                 }
-            }
+            })
         } else {
             button({
                 text("pantheon.gui.faction_manage.close", true)
                 cls = { +"btn" }
-            }) {
-                api {
-                    setOnClick { _ -> player.closeContainer() }
-                }
-            }
+                onClick = { _ -> player.closeContainer() }
+            })
         }
     }
 }

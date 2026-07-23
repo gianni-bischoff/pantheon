@@ -96,7 +96,8 @@ object TempleUIFactory {
                     noText(); active = true
                     layout = { width(22.px); height(22.px) }
                     style = { background(swatchTexture(dyeColor(i), i == 0)) }
-                    onClick = { _ ->
+                    onClick = {
+                        gg.wildblood.Pantheon.LOGGER.info("SWATCH CLICK {}", i)
                         selectedColor = i
                         swatchElements.forEachIndexed { idx, el ->
                             el.style.background(swatchTexture(dyeColor(idx), idx == i))
@@ -119,6 +120,7 @@ object TempleUIFactory {
             text("pantheon.gui.faction_create.create", true)
             cls = { +"btn" }; active = true
             onClick = {
+                gg.wildblood.Pantheon.LOGGER.info("CREATE CLICK name={} color={} be={}", name, selectedColor, be)
                 if (name.isNotBlank()) {
                     be?.rpcToServer("rpcCreateFaction", name, selectedColor)
                 }

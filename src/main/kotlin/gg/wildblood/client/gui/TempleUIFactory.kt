@@ -63,12 +63,16 @@ object TempleUIFactory {
 
     fun createFactionUI(holder: BlockUIMenuType.BlockUIHolder): ModularUI {
         val server = holder.player.server
-        val data = server?.let { PantheonSavedData.get(it) }
-        val faction = data?.factions?.values?.find { it.anchor == holder.pos }
         val be = holder.player.level().getBlockEntity(holder.pos) as? gg.wildblood.blockentity.TempleBlockEntity
+        val hasFaction = be?.factionId?.isNotEmpty() == true
+        val faction = if (hasFaction && server != null) {
+            PantheonSavedData.get(server).factions.values.find { it.anchor == holder.pos }
+        } else null
 
         val root = if (faction != null) {
             createManageFactionUI(holder, faction, be)
+        } else if (hasFaction && be != null) {
+            createManageFactionUIFromBE(holder, be)
         } else {
             createNewFactionUI(holder, be)
         }
@@ -134,6 +138,66 @@ object TempleUIFactory {
                 }
             }
         })
+    }
+
+    private fun createManageFactionUIFromBE(
+        holder: BlockUIMenuType.BlockUIHolder,
+        be: gg.wildblood.blockentity.TempleBlockEntity,
+    ) = element({ cls = { +"panel_bg" } }) {
+        var name = be.displayName
+        var selectedColor = be.color
+        val player = holder.player
+        val isAdmin = player.hasPermissions(2)
+        val swatchElements = mutableListOf<UIElement>()
+
+        label({ text("pantheon.gui.faction_manage.title", true) })
+        label({ text("pantheon.gui.faction_create.name", true) })
+
+        textField({ layout = { width(180.px) } }) {
+            observer { name = it }
+            dataSource { name }
+        }
+
+        label({ text("pantheon.gui.faction_create.color", true) })
+
+        element({ layout = { gap { all(3.px) }; wrap(FlexWrap.WRAP); flexDirection(FlexDirection.ROW) } }) {
+            for (i in 0 until 16) {
+                button({
+                    noText(); active = true
+                    cls = { +"swatch"; +if (i == selectedColor) "selected" else "unselected" }
+                    layout = { width(22.px); height(22.px) }
+                    style = { background(swatchTexture(dyeColor(i))) }
+                    onClick = {
+                        selectedColor = i
+                        swatchElements.forEachIndexed { idx, el ->
+                            el.removeClass("selected")
+                            el.removeClass("unselected")
+                            el.addClass(if (idx == i) "selected" else "unselected")
+                        }
+                    }
+                }) {
+                    swatchElements.add(this.element)
+                }
+            }
+        }
+
+        label({ text = Component.translatable("pantheon.gui.faction_manage.members", be.memberCount) })
+
+        if (isAdmin) {
+            button({
+                text("pantheon.gui.faction_manage.save", true)
+                cls = { +"btn" }; active = true
+                onClick = {
+                    be.rpcToServer("rpcUpdateFaction", name, selectedColor)
+                }
+            })
+        } else {
+            button({
+                text("pantheon.gui.faction_manage.close", true)
+                cls = { +"btn" }; active = true
+                onClick = { player.closeContainer() }
+            })
+        }
     }
 
     private fun createManageFactionUI(

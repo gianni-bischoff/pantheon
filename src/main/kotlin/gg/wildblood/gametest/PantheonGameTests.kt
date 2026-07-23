@@ -18,7 +18,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate
 class PantheonGameTests {
 
     @GameTest(template = "pantheon_faction_create")
-    fun pantheon_faction_create(helper: GameTestHelper) {
+    fun pantheonFactionCreate(helper: GameTestHelper) {
         val server = helper.level.server
         val data = PantheonSavedData.get(server)
         data.factions.clear()
@@ -34,7 +34,7 @@ class PantheonGameTests {
     }
 
     @GameTest(template = "pantheon_faction_assign")
-    fun pantheon_faction_assign(helper: GameTestHelper) {
+    fun pantheonFactionAssign(helper: GameTestHelper) {
         val server = helper.level.server
         val data = PantheonSavedData.get(server)
         data.factions.clear()
@@ -53,7 +53,7 @@ class PantheonGameTests {
     }
 
     @GameTest(template = "pantheon_faction_info")
-    fun pantheon_faction_info(helper: GameTestHelper) {
+    fun pantheonFactionInfo(helper: GameTestHelper) {
         val server = helper.level.server
         val data = PantheonSavedData.get(server)
         data.factions.clear()
@@ -66,7 +66,7 @@ class PantheonGameTests {
     }
 
     @GameTest(template = "pantheon_faction_list")
-    fun pantheon_faction_list(helper: GameTestHelper) {
+    fun pantheonFactionList(helper: GameTestHelper) {
         val server = helper.level.server
         val data = PantheonSavedData.get(server)
         data.factions.clear()
@@ -82,7 +82,7 @@ class PantheonGameTests {
     }
 
     @GameTest(template = "pantheon_temple_mirror")
-    fun pantheon_temple_mirror(helper: GameTestHelper) {
+    fun pantheonTempleMirror(helper: GameTestHelper) {
         val server = helper.level.server
         val data = PantheonSavedData.get(server)
         data.factions.clear()
@@ -102,7 +102,7 @@ class PantheonGameTests {
     }
 
     @GameTest(template = "pantheon_persistence")
-    fun pantheon_persistence(helper: GameTestHelper) {
+    fun pantheonPersistence(helper: GameTestHelper) {
         val server = helper.level.server
         val templePos = helper.absolutePos(BlockPos(0, 1, 0))
         val data = PantheonSavedData()
@@ -120,7 +120,7 @@ class PantheonGameTests {
     }
 
     @GameTest(template = "pantheon_faction_color")
-    fun pantheon_faction_color(helper: GameTestHelper) {
+    fun pantheonFactionColor(helper: GameTestHelper) {
         val server = helper.level.server
         val templePos = helper.absolutePos(BlockPos(0, 1, 0))
         val data = PantheonSavedData()
@@ -135,7 +135,7 @@ class PantheonGameTests {
     }
 
     @GameTest(template = "pantheon_faction_id_inference")
-    fun pantheon_faction_id_inference(helper: GameTestHelper) {
+    fun pantheonFactionIdInference(helper: GameTestHelper) {
         val id1 = FactionId.fromDisplayName("Sun Keep")
         if (id1?.toString() != "pantheon:sun_keep") { helper.fail("Expected pantheon:sun_keep, got $id1"); return }
         val id2 = FactionId.fromDisplayName("Void Spire!")

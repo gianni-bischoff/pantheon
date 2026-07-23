@@ -55,6 +55,7 @@ class TempleBlockEntity(pos: BlockPos, state: BlockState)
         if (existing != null && existing.anchor != BlockPos.ZERO) return
         val f = data.createFaction(name, colorIndex, blockPos) ?: return
         FactionTeamManager.syncFaction(server, f)
+        syncFrom(f)
         level!!.setBlock(blockPos, blockState.setValue(TempleBlock.COLOR, DyeColor.byId(colorIndex)), 3)
         sender.asPlayer()!!.closeContainer()
     }
@@ -67,6 +68,7 @@ class TempleBlockEntity(pos: BlockPos, state: BlockState)
         val faction = data.factions.values.find { it.anchor == blockPos } ?: return
         data.updateFaction(faction.id, name, colorIndex)
         FactionTeamManager.syncFaction(server, faction)
+        syncFrom(faction)
         level!!.setBlock(blockPos, blockState.setValue(TempleBlock.COLOR, DyeColor.byId(colorIndex)), 3)
         sender.asPlayer()!!.closeContainer()
     }

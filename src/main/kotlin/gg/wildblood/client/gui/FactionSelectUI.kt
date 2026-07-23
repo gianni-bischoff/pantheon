@@ -57,7 +57,7 @@ object FactionSelectUI {
             element({ layout = { gap { all(4.px) }; flexDirection(FlexDirection.COLUMN) } }) {
                 for (faction in data.factions.values) {
                     button({
-                        cls = { +"faction-btn" }
+                        cls = { +"faction-btn" }; active = true
                         layout = { width(200.px) }
                         onServerClick = {
                             val f = data.factions[faction.id]
@@ -74,7 +74,7 @@ object FactionSelectUI {
 
             button({
                 text("pantheon.gui.faction_select.skip", true)
-                cls = { +"btn" }
+                cls = { +"btn" }; active = true
                 onServerClick = { _ -> player.closeContainer() }
             })
         }

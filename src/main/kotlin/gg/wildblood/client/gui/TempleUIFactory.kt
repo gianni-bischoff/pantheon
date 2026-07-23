@@ -93,7 +93,7 @@ object TempleUIFactory {
         element({ layout = { gap { all(3.px) }; wrap(FlexWrap.WRAP); flexDirection(FlexDirection.ROW) } }) {
             for (i in 0 until 16) {
                 button({
-                    noText()
+                    noText(); active = true
                     layout = { width(22.px); height(22.px) }
                     style = { background(swatchTexture(dyeColor(i), i == 0)) }
                     onClick = { _ ->
@@ -117,7 +117,7 @@ object TempleUIFactory {
 
         button({
             text("pantheon.gui.faction_create.create", true)
-            cls = { +"btn" }
+            cls = { +"btn" }; active = true
             onClick = {
                 if (name.isNotBlank()) {
                     be?.rpcToServer("rpcCreateFaction", name, selectedColor)
@@ -151,7 +151,7 @@ object TempleUIFactory {
         element({ layout = { gap { all(3.px) }; wrap(FlexWrap.WRAP); flexDirection(FlexDirection.ROW) } }) {
             for (i in 0 until 16) {
                 button({
-                    noText()
+                    noText(); active = true
                     layout = { width(22.px); height(22.px) }
                     style = { background(swatchTexture(dyeColor(i), i == selectedColor)) }
                     onClick = { _ ->
@@ -180,7 +180,7 @@ object TempleUIFactory {
         if (isAdmin) {
             button({
                 text("pantheon.gui.faction_manage.save", true)
-                cls = { +"btn" }
+                cls = { +"btn" }; active = true
                 onClick = { _ ->
                     be?.rpcToServer("rpcUpdateFaction", name, selectedColor)
                 }
@@ -188,7 +188,7 @@ object TempleUIFactory {
         } else {
             button({
                 text("pantheon.gui.faction_manage.close", true)
-                cls = { +"btn" }
+                cls = { +"btn" }; active = true
                 onClick = { _ -> player.closeContainer() }
             })
         }

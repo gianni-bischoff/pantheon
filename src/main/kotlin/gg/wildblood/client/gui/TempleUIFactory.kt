@@ -2,23 +2,22 @@ package gg.wildblood.client.gui
 
 import gg.wildblood.Pantheon
 import gg.wildblood.block.TempleBlock
-import gg.wildblood.faction.Faction
 import gg.wildblood.faction.FactionId
-import gg.wildblood.faction.PantheonSavedData
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
 import com.lowdragmc.lowdraglib2.gui.ui.UI
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement
 import com.lowdragmc.lowdraglib2.gui.ui.element
+import com.lowdragmc.lowdraglib2.gui.ui.dsl
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*
 import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import dev.vfyjxf.taffy.style.FlexDirection
 import dev.vfyjxf.taffy.style.FlexWrap
+import dev.vfyjxf.taffy.style.TaffyPosition
 import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture
 import com.lowdragmc.lowdraglib2.gui.texture.ColorBorderTexture
 import com.lowdragmc.lowdraglib2.gui.texture.GuiTextureGroup
 import com.lowdragmc.lowdraglib2.gui.ui.style.Stylesheet
-import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.DyeColor
 
@@ -49,12 +48,10 @@ object TempleUIFactory {
             height: 22;
         }
         .swatch.selected {
-            border: 3;
-            border-color: 0xFFFFFFFF;
+            background: color-border(0xFFFFFFFF, 3);
         }
         .swatch.unselected {
-            border: 1;
-            border-color: 0xFF666666;
+            background: color-border(0xFF666666, 1);
         }
     """.trimIndent()
 
@@ -62,17 +59,9 @@ object TempleUIFactory {
         ColorRectTexture(0xFF000000.toInt() or dye.mapColor.col)
 
     fun createFactionUI(holder: BlockUIMenuType.BlockUIHolder): ModularUI {
-        val server = holder.player.server
         val be = holder.player.level().getBlockEntity(holder.pos) as? gg.wildblood.blockentity.TempleBlockEntity
-        val hasFaction = be?.factionId?.isNotEmpty() == true
-        val faction = if (hasFaction && server != null) {
-            PantheonSavedData.get(server).factions.values.find { it.anchor == holder.pos }
-        } else null
-
-        val root = if (faction != null) {
-            createManageFactionUI(holder, faction, be)
-        } else if (hasFaction && be != null) {
-            createManageFactionUIFromBE(holder, be)
+        val root = if (be != null && be.factionId.isNotEmpty()) {
+            createManageFactionUI(holder, be)
         } else {
             createNewFactionUI(holder, be)
         }
@@ -140,22 +129,56 @@ object TempleUIFactory {
         })
     }
 
-    private fun createManageFactionUIFromBE(
+    private fun createManageFactionUI(
         holder: BlockUIMenuType.BlockUIHolder,
         be: gg.wildblood.blockentity.TempleBlockEntity,
     ) = element({ cls = { +"panel_bg" } }) {
         var name = be.displayName
         var selectedColor = be.color
         val player = holder.player
+        val isMayor = player.uuid.toString() == be.mayorUuid
         val isAdmin = player.hasPermissions(2)
+        val canEdit = isMayor || isAdmin
         val swatchElements = mutableListOf<UIElement>()
+        var nameField: com.lowdragmc.lowdraglib2.gui.ui.elements.TextField? = null
 
         label({ text("pantheon.gui.faction_manage.title", true) })
+
+        if (canEdit) {
+            var editBtn: com.lowdragmc.lowdraglib2.gui.ui.elements.Button? = null
+            var saveBtn: com.lowdragmc.lowdraglib2.gui.ui.elements.Button? = null
+            button({
+                text("pantheon.gui.faction_manage.edit", true)
+                cls = { +"btn" }; active = true
+                layout = { pos { type(TaffyPosition.ABSOLUTE); top(4.px); right(4.px) } }
+                onClick = {
+                    nameField?.setActive(true)
+                    swatchElements.forEach { it.setActive(true) }
+                    editBtn?.setVisible(false)
+                    saveBtn?.setVisible(true)
+                }
+            }) {
+                editBtn = this.element
+            }
+            button({
+                text("pantheon.gui.faction_manage.save", true)
+                cls = { +"btn" }; active = true
+                visible = false
+                layout = { pos { type(TaffyPosition.ABSOLUTE); top(4.px); right(4.px) } }
+                onClick = {
+                    be.rpcToServer("rpcUpdateFaction", name, selectedColor)
+                }
+            }) {
+                saveBtn = this.element
+            }
+        }
+
         label({ text("pantheon.gui.faction_create.name", true) })
 
-        textField({ layout = { width(180.px) } }) {
+        textField({ layout = { width(180.px) }; active = false }) {
             observer { name = it }
             dataSource { name }
+            nameField = this.element
         }
 
         label({ text("pantheon.gui.faction_create.color", true) })
@@ -163,7 +186,7 @@ object TempleUIFactory {
         element({ layout = { gap { all(3.px) }; wrap(FlexWrap.WRAP); flexDirection(FlexDirection.ROW) } }) {
             for (i in 0 until 16) {
                 button({
-                    noText(); active = true
+                    noText(); active = false
                     cls = { +"swatch"; +if (i == selectedColor) "selected" else "unselected" }
                     layout = { width(22.px); height(22.px) }
                     style = { background(swatchTexture(dyeColor(i))) }
@@ -183,86 +206,33 @@ object TempleUIFactory {
 
         label({ text = Component.translatable("pantheon.gui.faction_manage.members", be.memberCount) })
 
-        if (isAdmin) {
-            button({
-                text("pantheon.gui.faction_manage.save", true)
-                cls = { +"btn" }; active = true
-                onClick = {
-                    be.rpcToServer("rpcUpdateFaction", name, selectedColor)
-                }
-            })
-        } else {
-            button({
-                text("pantheon.gui.faction_manage.close", true)
-                cls = { +"btn" }; active = true
-                onClick = { player.closeContainer() }
-            })
-        }
-    }
+        val memberContainer = com.lowdragmc.lowdraglib2.gui.ui.UIElement()
+        memberContainer.layout { it.gapAll(2f).flexDirection(FlexDirection.COLUMN) }
 
-    private fun createManageFactionUI(
-        holder: BlockUIMenuType.BlockUIHolder,
-        faction: Faction,
-        be: gg.wildblood.blockentity.TempleBlockEntity?,
-    ) = element({ cls = { +"panel_bg" } }) {
-        var name = faction.displayName
-        var selectedColor = faction.color
-        val player = holder.player
-        val server = player.server
-        val isAdmin = player.hasPermissions(2)
-        val swatchElements = mutableListOf<UIElement>()
-
-        label({ text("pantheon.gui.faction_manage.title", true) })
-        label({ text("pantheon.gui.faction_create.name", true) })
-
-        textField({ layout = { width(180.px) } }) {
-            observer { name = it }
-            dataSource { name }
-        }
-
-        label({ text("pantheon.gui.faction_create.color", true) })
-
-        element({ layout = { gap { all(3.px) }; wrap(FlexWrap.WRAP); flexDirection(FlexDirection.ROW) } }) {
-            for (i in 0 until 16) {
-                button({
-                    noText(); active = true
-                    cls = { +"swatch"; +if (i == selectedColor) "selected" else "unselected" }
-                    layout = { width(22.px); height(22.px) }
-                    style = { background(swatchTexture(dyeColor(i))) }
-                    onClick = {
-                        selectedColor = i
-                        swatchElements.forEachIndexed { idx, el ->
-                            el.removeClass("selected")
-                            el.removeClass("unselected")
-                            el.addClass(if (idx == i) "selected" else "unselected")
-                        }
+        val memberSync = com.lowdragmc.lowdraglib2.gui.ui.elements.BindableValue<String>()
+        memberSync.bind(
+            com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder
+                .stringS2C { be.memberNames }
+                .syncType(String::class.java)
+                .initialValue(be.memberNames)
+                .s2cStrategy(com.lowdragmc.lowdraglib2.gui.sync.bindings.SyncStrategy.CHANGED_PERIODIC)
+                .remoteSetter { names ->
+                    memberContainer.clearAllChildren()
+                    for (memberName in names.split('\n').filter { it.isNotEmpty() }) {
+                        memberContainer.addChild(
+                            com.lowdragmc.lowdraglib2.gui.ui.elements.Label().setText("• $memberName")
+                        )
                     }
-                }) {
-                    swatchElements.add(this.element)
                 }
-            }
+                .build()
+        )
+        memberContainer.addChild(memberSync)
+
+        scrollerView({ layout = { width(200.px); height(120.px) } }) {
+            dsl({ memberContainer }, {}, {})
         }
 
-        label({ text = Component.translatable("pantheon.gui.faction_manage.members", faction.memberCount) })
-
-        element({ layout = { gap { all(2.px) }; flexDirection(FlexDirection.COLUMN) } }) {
-            for (uuid in faction.members) {
-                val profile = server?.profileCache?.get(uuid)?.orElse(null)
-                if (profile != null) {
-                    label({ text("• ${profile.name}", false) })
-                }
-            }
-        }
-
-        if (isAdmin) {
-            button({
-                text("pantheon.gui.faction_manage.save", true)
-                cls = { +"btn" }; active = true
-                onClick = {
-                    be?.rpcToServer("rpcUpdateFaction", name, selectedColor)
-                }
-            })
-        } else {
+        if (!canEdit) {
             button({
                 text("pantheon.gui.faction_manage.close", true)
                 cls = { +"btn" }; active = true

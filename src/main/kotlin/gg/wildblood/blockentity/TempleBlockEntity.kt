@@ -32,6 +32,7 @@ class TempleBlockEntity(pos: BlockPos, state: BlockState)
     @Persisted @DescSynced var godId: String = ""
     @Persisted @DescSynced var mayorUuid: String = ""
     @Persisted @DescSynced var memberCount: Int = 0
+    @Persisted @DescSynced var memberNames: String = ""
     @Persisted @DescSynced var skillpointPool: Int = 0
 
     fun syncFrom(faction: Faction) {
@@ -41,6 +42,9 @@ class TempleBlockEntity(pos: BlockPos, state: BlockState)
         godId = faction.godId?.toString() ?: ""
         mayorUuid = faction.mayor?.toString() ?: ""
         memberCount = faction.memberCount
+        memberNames = faction.members.joinToString("\n") { uuid ->
+            level?.server?.profileCache?.get(uuid)?.orElse(null)?.name ?: uuid.toString()
+        }
         skillpointPool = faction.skillpointPool
         setChanged()
     }
@@ -66,11 +70,15 @@ class TempleBlockEntity(pos: BlockPos, state: BlockState)
         val server = level!!.server ?: return
         val data = PantheonSavedData.get(server)
         val faction = data.factions.values.find { it.anchor == blockPos } ?: return
+        val player = sender.asPlayer() ?: return
+        val isMayor = faction.mayor == player.uuid
+        val isAdmin = player.hasPermissions(2)
+        if (!isMayor && !isAdmin) return
         data.updateFaction(faction.id, name, colorIndex)
         FactionTeamManager.syncFaction(server, faction)
         syncFrom(faction)
         level!!.setBlock(blockPos, blockState.setValue(TempleBlock.COLOR, DyeColor.byId(colorIndex)), 3)
-        sender.asPlayer()!!.closeContainer()
+        player.closeContainer()
     }
 
     @RPCMethod
@@ -81,9 +89,15 @@ class TempleBlockEntity(pos: BlockPos, state: BlockState)
         val id = net.minecraft.resources.ResourceLocation.parse(factionIdStr)
         val faction = data.factions[id] ?: return
         val player = sender.asPlayer()!!
+        val oldFaction = data.findFactionByPlayer(player.uuid)
         data.assignPlayerToFaction(player.uuid, id)
         player.setData(gg.wildblood.attachment.ModAttachments.FACTION.get(), id)
-        FactionTeamManager.addPlayerToFaction(server, faction, player.uuid, player.scoreboardName)
+        FactionTeamManager.syncFaction(server, faction)
+        oldFaction?.let { FactionTeamManager.syncFaction(server, it) }
+        for (f in listOfNotNull(faction, oldFaction)) {
+            val anchorBe = level!!.getBlockEntity(f.anchor) as? TempleBlockEntity
+            anchorBe?.syncFrom(f)
+        }
         player.closeContainer()
     }
 

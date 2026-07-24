@@ -74,7 +74,7 @@ object Pantheon {
         com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType.register(FactionLoginHandler.FACTION_SELECT_UI_ID) { p ->
             object : com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType.PlayerUIHolder {
                 override fun createUI(player: net.minecraft.world.entity.player.Player): com.lowdragmc.lowdraglib2.gui.ui.ModularUI =
-                    gg.wildblood.client.gui.FactionSelectUI.create(player as net.minecraft.server.level.ServerPlayer)
+                    gg.wildblood.client.gui.FactionSelectUI.create(player)
             }
         }
     }

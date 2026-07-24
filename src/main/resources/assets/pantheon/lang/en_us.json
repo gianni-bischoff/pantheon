@@ -46,6 +46,7 @@
   "pantheon.gui.faction_manage.title": "Manage Faction",
   "pantheon.gui.faction_manage.members": "Members (%d):",
   "pantheon.gui.faction_manage.save": "Save",
+  "pantheon.gui.faction_manage.edit": "Edit",
   "pantheon.gui.faction_manage.close": "Close",
   "pantheon.gui.faction_select.title": "Choose Your Faction",
   "pantheon.gui.faction_select.description": "Select a faction to join, or skip to remain factionless.",

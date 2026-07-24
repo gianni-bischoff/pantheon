@@ -55,9 +55,18 @@ class PantheonSavedData : SavedData() {
     }
 
     fun assignPlayerToFaction(playerUuid: UUID, factionId: ResourceLocation) {
+        for (f in factions.values) {
+            if (f.id != factionId && playerUuid in f.members) {
+                f.members.remove(playerUuid)
+                if (f.mayor == playerUuid) f.mayor = null
+            }
+        }
         factions[factionId]?.members?.add(playerUuid)
         setDirty()
     }
+
+    fun findFactionByPlayer(playerUuid: UUID): Faction? =
+        factions.values.find { playerUuid in it.members }
 
     fun setMayor(factionId: ResourceLocation, uuid: UUID) {
         factions[factionId]?.let { it.members.add(uuid); it.mayor = uuid }

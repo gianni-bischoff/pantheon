@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
 import gg.wildblood.attachment.ModAttachments
 import gg.wildblood.block.ModBlocks
+import gg.wildblood.faction.FactionTeamManager
 import gg.wildblood.faction.PantheonSavedData
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
@@ -71,13 +72,22 @@ object ModCommands {
             source.sendFailure(Component.translatable("pantheon.command.faction.invalid_id", factionIdStr))
             return 0
         }
-        val data = PantheonSavedData.get(source.server)
-        if (!data.factions.containsKey(rl)) {
+        val server = source.server
+        val data = PantheonSavedData.get(server)
+        val faction = data.factions[rl]
+        if (faction == null) {
             source.sendFailure(Component.translatable("pantheon.command.faction.info.none", rl.toString()))
             return 0
         }
+        val oldFaction = data.findFactionByPlayer(player.uuid)
         data.assignPlayerToFaction(player.uuid, rl)
         player.setData(ModAttachments.FACTION.get(), rl)
+        FactionTeamManager.syncFaction(server, faction)
+        oldFaction?.let { FactionTeamManager.syncFaction(server, it) }
+        for (f in listOfNotNull(faction, oldFaction)) {
+            val anchorBe = server.overworld().getBlockEntity(f.anchor) as? gg.wildblood.blockentity.TempleBlockEntity
+            anchorBe?.syncFrom(f)
+        }
         source.sendSuccess({ Component.translatable("pantheon.command.faction.assign.success", player.name, rl.toString()) }, true)
         return 1
     }

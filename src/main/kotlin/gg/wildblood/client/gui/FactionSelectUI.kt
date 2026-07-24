@@ -9,7 +9,11 @@ import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.dsl
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*
 import com.lowdragmc.lowdraglib2.gui.sync.rpc.rpcEvent
+import com.lowdragmc.lowdraglib2.gui.ui.layout.pct
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
+import com.lowdragmc.lowdraglib2.gui.ui.layout.pct
+import dev.vfyjxf.taffy.style.AlignContent
+import dev.vfyjxf.taffy.style.AlignItems
 import dev.vfyjxf.taffy.style.FlexDirection
 import com.lowdragmc.lowdraglib2.gui.ui.style.Stylesheet
 import net.minecraft.world.entity.player.Player
@@ -21,6 +25,8 @@ object FactionSelectUI {
             background: built-in(ui-gdp:BORDER);
             padding-all: 10;
             gap-all: 6;
+            width: 90%;
+            height: 90%;
         }
         .panel_bg label {
             horizontal-align: center;
@@ -35,7 +41,8 @@ object FactionSelectUI {
             background: built-in(ui-gdp:RECT_SOLID);
         }
         .faction-btn {
-            width: 200;
+            width: 100%;
+            max-width: 220;
             height: 24;
             padding-horizontal: 6;
             gap-all: 4;
@@ -43,6 +50,11 @@ object FactionSelectUI {
         }
         .faction-btn:hover {
             background: built-in(ui-gdp:RECT_SOLID);
+        }
+        .faction-list {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 40;
         }
     """.trimIndent()
 
@@ -52,7 +64,7 @@ object FactionSelectUI {
         val factionListStr = data?.factions?.values
             ?.joinToString("\n") { "${it.id}|${it.displayName}" } ?: ""
 
-        val root = element({ cls = { +"panel_bg" } }) {
+        val content = element({ cls = { +"panel_bg" } }) {
             label({ text("pantheon.gui.faction_select.title", true) })
             label({ text("pantheon.gui.faction_select.description", true) })
 
@@ -91,7 +103,6 @@ object FactionSelectUI {
                             btn.setText(displayName)
                             btn.setActive(true)
                             btn.addClass("faction-btn")
-                            btn.layout { it.width(200f) }
                             btn.setOnClick { _ -> joinRpc.send(idStr) }
                             factionContainer.addChild(btn)
                         }
@@ -99,7 +110,9 @@ object FactionSelectUI {
                     .build()
             )
             factionContainer.addChild(factionSync)
-            dsl({ factionContainer }, {}, {})
+            scrollerView({ cls = { +"faction-list" } }) {
+                dsl({ factionContainer }, {}, {})
+            }
 
             button({
                 text("pantheon.gui.faction_select.skip", true)
@@ -108,7 +121,17 @@ object FactionSelectUI {
             })
         }
 
+        val root = element({
+            layout = { width(100.pct); height(100.pct); justifyContent(AlignContent.CENTER); alignItems(AlignItems.CENTER) }
+        }) {
+            dsl({ content }, {}, {})
+        }
+
         val stylesheet = Stylesheet.parse(LSS)
-        return ModularUI.of(UI.of(root, stylesheet), player)
+        val ui = com.lowdragmc.lowdraglib2.gui.ui.UI.of(
+            root, listOf(stylesheet),
+            com.lowdragmc.lowdraglib2.gui.ui.UI.DynamicSizeProvider { size -> size }
+        )
+        return ModularUI.of(ui, player)
     }
 }

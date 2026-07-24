@@ -11,12 +11,16 @@ import com.lowdragmc.lowdraglib2.gui.ui.dsl
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*
 import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
+import com.lowdragmc.lowdraglib2.gui.ui.layout.pct
+import dev.vfyjxf.taffy.style.AlignContent
+import dev.vfyjxf.taffy.style.AlignItems
 import dev.vfyjxf.taffy.style.FlexDirection
 import dev.vfyjxf.taffy.style.FlexWrap
 import dev.vfyjxf.taffy.style.TaffyPosition
 import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture
 import com.lowdragmc.lowdraglib2.gui.texture.ColorBorderTexture
 import com.lowdragmc.lowdraglib2.gui.texture.GuiTextureGroup
+import com.lowdragmc.lowdraglib2.gui.ui.layout.pct
 import com.lowdragmc.lowdraglib2.gui.ui.style.Stylesheet
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.DyeColor
@@ -30,6 +34,8 @@ object TempleUIFactory {
             background: built-in(ui-gdp:BORDER);
             padding-all: 10;
             gap-all: 6;
+            width: 90%;
+            height: 90%;
         }
         .panel_bg label {
             horizontal-align: center;
@@ -53,6 +59,15 @@ object TempleUIFactory {
         .swatch.unselected {
             background: color-border(0xFF666666, 1);
         }
+        .field {
+            width: 100%;
+            max-width: 220;
+        }
+        .scroller {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 60;
+        }
     """.trimIndent()
 
     private fun swatchTexture(dye: DyeColor): ColorRectTexture =
@@ -60,14 +75,24 @@ object TempleUIFactory {
 
     fun createFactionUI(holder: BlockUIMenuType.BlockUIHolder): ModularUI {
         val be = holder.player.level().getBlockEntity(holder.pos) as? gg.wildblood.blockentity.TempleBlockEntity
-        val root = if (be != null && be.factionId.isNotEmpty()) {
+        val content = if (be != null && be.factionId.isNotEmpty()) {
             createManageFactionUI(holder, be)
         } else {
             createNewFactionUI(holder, be)
         }
 
+        val root = element({
+            layout = { width(100.pct); height(100.pct); justifyContent(AlignContent.CENTER); alignItems(AlignItems.CENTER) }
+        }) {
+            dsl({ content }, {}, {})
+        }
+
         val stylesheet = Stylesheet.parse(LSS)
-        return ModularUI.of(UI.of(root, stylesheet), holder.player)
+        val ui = com.lowdragmc.lowdraglib2.gui.ui.UI.of(
+            root, listOf(stylesheet),
+            com.lowdragmc.lowdraglib2.gui.ui.UI.DynamicSizeProvider { size -> size }
+        )
+        return ModularUI.of(ui, holder.player)
     }
 
     private fun createNewFactionUI(
@@ -81,7 +106,7 @@ object TempleUIFactory {
         label({ text("pantheon.gui.faction_create.title", true) })
         label({ text("pantheon.gui.faction_create.name", true) })
 
-        textField({ layout = { width(180.px) } }) {
+        textField({ cls = { +"field" } }) {
             observer { name = it }
             dataSource { name }
         }
@@ -175,7 +200,7 @@ object TempleUIFactory {
 
         label({ text("pantheon.gui.faction_create.name", true) })
 
-        textField({ layout = { width(180.px) }; active = false }) {
+        textField({ cls = { +"field" }; active = false }) {
             observer { name = it }
             dataSource { name }
             nameField = this.element
@@ -228,7 +253,7 @@ object TempleUIFactory {
         )
         memberContainer.addChild(memberSync)
 
-        scrollerView({ layout = { width(200.px); height(120.px) } }) {
+        scrollerView({ cls = { +"scroller" } }) {
             dsl({ memberContainer }, {}, {})
         }
 
